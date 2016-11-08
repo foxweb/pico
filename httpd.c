@@ -1,15 +1,16 @@
 #include "httpd.h"
 
-#include<stdio.h>
-#include<string.h>
-#include<stdlib.h>
-#include<unistd.h>
-#include<sys/types.h>
-#include<sys/stat.h>
-#include<sys/socket.h>
-#include<arpa/inet.h>
-#include<netdb.h>
-#include<fcntl.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <fcntl.h>
+#include <signal.h>
 
 #define CONNMAX 1000
 
@@ -42,6 +43,9 @@ void serve_forever(const char *PORT)
     for (i=0; i<CONNMAX; i++)
         clients[i]=-1;
     startServer(PORT);
+    
+    // Ignore SIGCHLD to avoid zombie threads
+    signal(SIGCHLD,SIG_IGN);
 
     // ACCEPT connections
     while (1)
@@ -140,6 +144,13 @@ void respond(int n)
         prot   = strtok(NULL, " \t\r\n"); 
 
         fprintf(stderr, "\x1b[32m + [%s] %s\x1b[0m\n", method, uri);
+        
+        if (qs = strchr(uri, '?'))
+        {
+            *qs++ = '\0'; //split URI
+        } else {
+            qs = uri - 1; //use an empty string
+        }
 
         header_t *h = reqhdr;
         char *t, *t2;

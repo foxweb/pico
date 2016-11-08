@@ -11,7 +11,8 @@ void serve_forever(const char *PORT);
 // Client request
 
 char    *method,    // "GET" or "POST"
-        *uri,       // "/index.html"
+        *uri,       // "/index.html" things before '?'
+        *qs,        // "a=1&b=2"     things after  '?'
         *prot;      // "HTTP/1.1"
 
 char    *payload;     // for POST
