@@ -14,6 +14,12 @@ To log stuff, use `fprintf(stderr, "message");`
 
 View `httpd.h` for more information.
 
+## Test example
+
+Open http://localhost:8000/test in browser to see request headers.
+
+## Links
+
 Reworked and refactored from <https://gist.github.com/laobubu/d6d0e9beb934b60b2e552c2d03e1409e>.
 
 Based on <http://blog.abhijeetr.com/2010/04/very-simple-http-server-writen-in-c.html>.
