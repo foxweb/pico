@@ -19,8 +19,6 @@ static void error(char *);
 static void startServer(const char *);
 static void respond(int);
 
-typedef struct { char *name, *value; } header_t;
-static header_t reqhdr[17] = {{"\0", "\0"}};
 static int clientfd;
 
 static char *buf;
@@ -100,7 +98,7 @@ void startServer(const char *port) {
   }
 }
 
-// get request header
+// get request header by name
 char *request_header(const char *name) {
   header_t *h = reqhdr;
   while (h->name) {
@@ -109,6 +107,11 @@ char *request_header(const char *name) {
     h++;
   }
   return NULL;
+}
+
+// get all request headers
+header_t *request_headers(void) {
+  return reqhdr;
 }
 
 // client connection
@@ -127,9 +130,9 @@ void respond(int n) {
   {
     buf[rcvd] = '\0';
 
-    method = strtok(buf, " \t\n");
+    method = strtok(buf, " \t\r\n");
     uri = strtok(NULL, " \t");
-    prot = strtok(NULL, " \t\n");
+    prot = strtok(NULL, " \t\r\n");
 
     fprintf(stderr, "\x1b[32m + [%s] %s\x1b[0m\n", method, uri);
 
@@ -146,11 +149,11 @@ void respond(int n) {
     while (h < reqhdr + 16) {
       char *k, *v, *t;
 
-      k = strtok(NULL, "\n: \t");
+      k = strtok(NULL, "\r\n: \t");
       if (!k)
         break;
 
-      v = strtok(NULL, "\n");
+      v = strtok(NULL, "\r\n");
       while (*v && *v == ' ')
         v++;
 
