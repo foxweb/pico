@@ -1,22 +1,22 @@
 #include "httpd.h"
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <sys/mman.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/socket.h>
 #include <arpa/inet.h>
-#include <netdb.h>
 #include <fcntl.h>
+#include <netdb.h>
 #include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/mman.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #define MAX_CONNECTIONS 1000
 
 static int listenfd;
-int * clients;
+int *clients;
 static void error(char *);
 static void start_server(const char *);
 static void respond(int);
@@ -36,7 +36,8 @@ void serve_forever(const char *PORT) {
          "\033[0m");
 
   // create shared memory for client slot array
-  clients = mmap(NULL, sizeof(*clients)*MAX_CONNECTIONS, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, -1, 0);
+  clients = mmap(NULL, sizeof(*clients) * MAX_CONNECTIONS,
+                 PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, -1, 0);
 
   // Setting all elements to -1: signifies there is no client connected
   int i;
@@ -120,9 +121,7 @@ char *request_header(const char *name) {
 }
 
 // get all request headers
-header_t *request_headers(void) {
-  return reqhdr;
-}
+header_t *request_headers(void) { return reqhdr; }
 
 // client connection
 void respond(int n) {
