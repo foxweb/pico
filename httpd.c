@@ -18,7 +18,7 @@
 static int listenfd;
 int * clients;
 static void error(char *);
-static void startServer(const char *);
+static void start_server(const char *);
 static void respond(int);
 
 static int clientfd;
@@ -34,7 +34,7 @@ void serve_forever(const char *PORT) {
 
   printf("Server started %shttp://127.0.0.1:%s%s\n", "\033[92m", PORT,
          "\033[0m");
-  
+
   // create shared memory for client slot array
   clients = mmap(NULL, sizeof(*clients)*MAX_CONNECTIONS, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, -1, 0);
 
@@ -42,7 +42,7 @@ void serve_forever(const char *PORT) {
   int i;
   for (i = 0; i < MAX_CONNECTIONS; i++)
     clients[i] = -1;
-  startServer(PORT);
+  start_server(PORT);
 
   // Ignore SIGCHLD to avoid zombie threads
   signal(SIGCHLD, SIG_IGN);
@@ -54,10 +54,15 @@ void serve_forever(const char *PORT) {
 
     if (clients[slot] < 0) {
       perror("accept() error");
+      exit(1);
     } else {
       if (fork() == 0) {
+        close(listenfd);
         respond(slot);
+        close(clients[slot]);
         exit(0);
+      } else {
+        close(clients[slot]);
       }
     }
 
@@ -67,7 +72,7 @@ void serve_forever(const char *PORT) {
 }
 
 // start server
-void startServer(const char *port) {
+void start_server(const char *port) {
   struct addrinfo hints, *res, *p;
 
   // getaddrinfo for host
@@ -195,4 +200,6 @@ void respond(int n) {
       SHUT_RDWR); // All further send and recieve operations are DISABLED...
   close(clientfd);
   clients[n] = -1;
+
+  free(buf);
 }
