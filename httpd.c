@@ -127,9 +127,10 @@ header_t *request_headers(void) { return reqhdr; }
 void respond(int n) {
   int rcvd, fd, bytes_read;
   char *ptr;
+  int buf_size = 65535;
 
-  buf = malloc(65535);
-  rcvd = recv(clients[n], buf, 65535, 0);
+  buf = malloc(buf_size);
+  rcvd = recv(clients[n], buf, buf_size, 0);
 
   if (rcvd < 0) // receive error
     fprintf(stderr, ("recv() error\n"));
