@@ -157,7 +157,7 @@ void respond(int n) {
     header_t *h = reqhdr;
     char *t, *t2;
     while (h < reqhdr + 16) {
-      char *k, *v, *t;
+      char *k, *v;
 
       k = strtok(NULL, "\r\n: \t");
       if (!k)
