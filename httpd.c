@@ -1,7 +1,6 @@
 #include "httpd.h"
 
 #include <arpa/inet.h>
-#include <fcntl.h>
 #include <netdb.h>
 #include <signal.h>
 #include <stdio.h>
@@ -9,15 +8,12 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/socket.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 #define MAX_CONNECTIONS 1000
 
 static int listenfd;
 int *clients;
-static void error(char *);
 static void start_server(const char *);
 static void respond(int);
 
@@ -28,7 +24,6 @@ static char *buf;
 void serve_forever(const char *PORT) {
   struct sockaddr_in clientaddr;
   socklen_t addrlen;
-  char c;
 
   int slot = 0;
 
@@ -125,8 +120,7 @@ header_t *request_headers(void) { return reqhdr; }
 
 // client connection
 void respond(int n) {
-  int rcvd, fd, bytes_read;
-  char *ptr;
+  int rcvd;
   int buf_size = 65535;
 
   buf = malloc(buf_size);
@@ -157,7 +151,7 @@ void respond(int n) {
     header_t *h = reqhdr;
     char *t, *t2;
     while (h < reqhdr + 16) {
-      char *k, *v, *t;
+      char *k, *v;
 
       k = strtok(NULL, "\r\n: \t");
       if (!k)

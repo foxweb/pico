@@ -1,7 +1,8 @@
 #include "httpd.h"
 
 int main(int c, char **v) {
-  serve_forever("8000");
+  char *port = c == 1 ? "8000" : v[1];
+  serve_forever(port);
   return 0;
 }
 
