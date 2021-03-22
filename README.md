@@ -16,7 +16,9 @@ View `httpd.h` for more information.
 
 ## Test example
 
-Open http://localhost:8000/test in browser to see request headers.
+1. Run `make`.
+2. Run `./server` or `./server [port]` (port = 8000 by default).
+3. Open http://localhost:8000/ or http://localhost:8000/test in browser to see request headers.
 
 ## Links
 
