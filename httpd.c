@@ -21,6 +21,16 @@ static int clientfd;
 
 static char *buf;
 
+// Client request
+
+char *method, // "GET" or "POST"
+    *uri,     // "/index.html" things before '?'
+    *qs,      // "a=1&b=2"     things after  '?'
+    *prot;    // "HTTP/1.1"
+
+char *payload; // for POST
+int payload_size;
+
 void serve_forever(const char *PORT) {
   struct sockaddr_in clientaddr;
   socklen_t addrlen;
