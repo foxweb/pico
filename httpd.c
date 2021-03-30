@@ -13,22 +13,21 @@
 #define MAX_CONNECTIONS 1000
 
 static int listenfd;
+static int clientfd;
 int *clients;
 static void start_server(const char *);
 static void respond(int);
 
-static int clientfd;
 
 static char *buf;
 
 // Client request
+char *method,  // "GET" or "POST"
+     *uri,     // "/index.html" things before '?'
+     *qs,      // "a=1&b=2" things after  '?'
+     *prot,    // "HTTP/1.1"
+     *payload; // for POST
 
-char *method, // "GET" or "POST"
-    *uri,     // "/index.html" things before '?'
-    *qs,      // "a=1&b=2"     things after  '?'
-    *prot;    // "HTTP/1.1"
-
-char *payload; // for POST
 int payload_size;
 
 void serve_forever(const char *PORT) {

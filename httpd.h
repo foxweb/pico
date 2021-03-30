@@ -5,7 +5,6 @@
 #include <string.h>
 
 // Server control functions
-
 void serve_forever(const char *PORT);
 
 char *request_header(const char *name);
