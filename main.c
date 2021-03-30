@@ -1,4 +1,17 @@
 #include "httpd.h"
+#include <sys/stat.h>
+
+#define RESPONSE_PROTOCOL "HTTP/1.1"
+
+#define HTTP_200 printf("%s 200 OK\n\n", RESPONSE_PROTOCOL)
+#define HTTP_201 printf("%s 201 Created\n\n", RESPONSE_PROTOCOL)
+#define HTTP_404 printf("%s 404 Not found\n\n", RESPONSE_PROTOCOL)
+#define HTTP_500 printf("%s 500 Internal Server Error\n\n", RESPONSE_PROTOCOL)
+
+#define CHUNK 1024 // read 1024 bytes at a time
+
+#define PUBLIC_DIR "./public"
+#define INDEX_HTML "/index.html"
 
 // Client request
 extern char *method,    // "GET" or "POST"
@@ -15,17 +28,55 @@ int main(int c, char **v) {
   return 0;
 }
 
+int file_exists(const char *file_name) {
+    struct stat buffer;
+    int exist = stat(file_name, &buffer);
+    if (exist == 0)
+      return 1;
+    else
+      return 0;
+}
+
+int read_file(const char *file_name) {
+  char buf[CHUNK];
+  FILE *file;
+  size_t nread;
+
+  file = fopen(file_name, "r");
+  if (file) {
+    while ((nread = fread(buf, 1, sizeof buf, file)) > 0)
+    fwrite(buf, 1, nread, stdout);
+    if (ferror(file)) {
+      return 1;
+    } else {
+      fclose(file);
+      return 0;
+    }
+  } else {
+    return 1;
+  }
+}
+
 void route() {
   ROUTE_START()
 
   ROUTE_GET("/") {
-    printf("HTTP/1.1 200 OK\r\n\r\n");
-    printf("Hello! You are using %s", request_header("User-Agent"));
+    // BUG: strange pointer behavior
+    // char *index_html;
+    // sprintf(index_html, "%s%s", PUBLIC_DIR, INDEX_HTML);
+
+    HTTP_200;
+    if (file_exists("./public/index.html")) {
+      // fprintf(stderr, "Route URI: %s\n", index_html);
+      read_file("./public/index.html");
+    } else {
+      printf("Hello! You are using %s\n\n", request_header("User-Agent"));
+    }
   }
 
   ROUTE_GET("/test") {
-    printf("HTTP/1.1 200 OK\r\n\r\n");
-    printf("List of request headers:\r\n\r\n");
+    HTTP_200;
+    printf("List of request headers:\n\n");
 
     header_t *h = request_headers();
 
@@ -36,9 +87,22 @@ void route() {
   }
 
   ROUTE_POST("/") {
-    printf("HTTP/1.1 200 OK\r\n\r\n");
-    printf("Wow, seems that you POSTed %d bytes. \r\n", payload_size);
-    printf("Fetch the data using `payload` variable.");
+    HTTP_201;
+    printf("Wow, seems that you POSTed %d bytes.\n", payload_size);
+    printf("Fetch the data using `payload` variable.\n");
+    if (payload_size > 0) printf("Request body: %s", payload);
+  }
+
+  ROUTE_GET(uri) {
+    char *file_name;
+    sprintf(file_name, "%s%s", PUBLIC_DIR, uri);
+
+    if (file_exists(file_name)) {
+      HTTP_200;
+      read_file(file_name);
+    } else {
+      HTTP_404;
+    }
   }
 
   ROUTE_END()

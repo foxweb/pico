@@ -178,7 +178,7 @@ void respond(int n) {
       if (t[1] == '\r' && t[2] == '\n')
         break;
     }
-    t++; // now the *t shall be the beginning of user payload
+    t = strtok(NULL, "\r\n");
     t2 = request_header("Content-Length"); // and the related header if there is
     payload = t;
     payload_size = t2 ? atol(t2) : (rcvd - (t - buf));

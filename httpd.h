@@ -28,7 +28,6 @@ void route();
 #define ROUTE_POST(URI) ROUTE("POST", URI)
 #define ROUTE_END()                                                            \
   }                                                                            \
-  else printf("HTTP/1.1 500 Internal Server Error\n\n"                         \
-              "The server has no handler to the request.\n");
+  else HTTP_500;
 
 #endif
