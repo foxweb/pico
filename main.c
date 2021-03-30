@@ -62,13 +62,12 @@ void route() {
 
   ROUTE_GET("/") {
     // BUG: strange pointer behavior
-    // char *index_html;
-    // sprintf(index_html, "%s%s", PUBLIC_DIR, INDEX_HTML);
+    char *index_html[20];
+    sprintf(index_html, "%s%s", PUBLIC_DIR, INDEX_HTML);
 
     HTTP_200;
-    if (file_exists("./public/index.html")) {
-      // fprintf(stderr, "Route URI: %s\n", index_html);
-      read_file("./public/index.html");
+    if (file_exists(index_html)) {
+      read_file(index_html);
     } else {
       printf("Hello! You are using %s\n\n", request_header("User-Agent"));
     }
