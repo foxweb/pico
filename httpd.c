@@ -11,6 +11,8 @@
 #include <unistd.h>
 
 #define MAX_CONNECTIONS 1000
+#define BUF_SIZE 65535
+#define QUEUE_SIZE 1000000
 
 static int listenfd;
 static int clientfd;
@@ -106,7 +108,7 @@ void start_server(const char *port) {
   freeaddrinfo(res);
 
   // listen for incoming connections
-  if (listen(listenfd, 1000000) != 0) {
+  if (listen(listenfd, QUEUE_SIZE) != 0) {
     perror("listen() error");
     exit(1);
   }
@@ -129,10 +131,9 @@ header_t *request_headers(void) { return reqhdr; }
 // client connection
 void respond(int n) {
   int rcvd;
-  int buf_size = 65535;
 
-  buf = malloc(buf_size);
-  rcvd = recv(clients[n], buf, buf_size, 0);
+  buf = malloc(BUF_SIZE);
+  rcvd = recv(clients[n], buf, BUF_SIZE, 0);
 
   if (rcvd < 0) // receive error
     fprintf(stderr, ("recv() error\n"));
@@ -150,11 +151,10 @@ void respond(int n) {
 
     qs = strchr(uri, '?');
 
-    if (qs) {
+    if (qs)
       *qs++ = '\0'; // split URI
-    } else {
+    else
       qs = uri - 1; // use an empty string
-    }
 
     header_t *h = reqhdr;
     char *t, *t2;
