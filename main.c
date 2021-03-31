@@ -8,7 +8,7 @@
 #define HTTP_404 printf("%s 404 Not found\n\n", RESPONSE_PROTOCOL)
 #define HTTP_500 printf("%s 500 Internal Server Error\n\n", RESPONSE_PROTOCOL)
 
-#define CHUNK 1024 // read 1024 bytes at a time
+#define CHUNK_SIZE 1024 // read 1024 bytes at a time
 
 #define PUBLIC_DIR "./public"
 #define INDEX_HTML "/index.html"
@@ -38,20 +38,24 @@ int file_exists(const char *file_name) {
 }
 
 int read_file(const char *file_name) {
-  char buf[CHUNK];
+  char buf[CHUNK_SIZE];
   FILE *file;
   size_t nread;
 
   file = fopen(file_name, "r");
+
   if (file) {
     while ((nread = fread(buf, 1, sizeof buf, file)) > 0)
+
     fwrite(buf, 1, nread, stdout);
+
     if (ferror(file)) {
       return 1;
     } else {
-      fclose(file);
       return 0;
     }
+
+    fclose(file);
   } else {
     return 1;
   }
@@ -61,8 +65,7 @@ void route() {
   ROUTE_START()
 
   ROUTE_GET("/") {
-    // BUG: strange pointer behavior
-    char *index_html[20];
+    char index_html[20];
     sprintf(index_html, "%s%s", PUBLIC_DIR, INDEX_HTML);
 
     HTTP_200;
@@ -93,7 +96,7 @@ void route() {
   }
 
   ROUTE_GET(uri) {
-    char *file_name;
+    char file_name[255];
     sprintf(file_name, "%s%s", PUBLIC_DIR, uri);
 
     if (file_exists(file_name)) {
