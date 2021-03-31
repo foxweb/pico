@@ -14,11 +14,19 @@ To log stuff, use `fprintf(stderr, "message");`
 
 View `httpd.h` for more information.
 
-## Test example
+## Quick start
 
 1. Run `make`.
 2. Run `./server` or `./server [port]` (port = 8000 by default).
 3. Open http://localhost:8000/ or http://localhost:8000/test in browser to see request headers.
+
+## Testing and benchmarking
+
+I suggest using [Siege](https://github.com/JoeDog/siege) utility for testing and benchmarking the Pico HTTP server.
+
+```sh
+> siege -i -f urls.txt
+```
 
 ## Links
 
