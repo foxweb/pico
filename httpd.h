@@ -24,8 +24,8 @@ void route();
 #define ROUTE(METHOD, URI)                                                     \
   }                                                                            \
   else if (strcmp(URI, uri) == 0 && strcmp(METHOD, method) == 0) {
-#define ROUTE_GET(URI) ROUTE("GET", URI)
-#define ROUTE_POST(URI) ROUTE("POST", URI)
+#define GET(URI) ROUTE("GET", URI)
+#define POST(URI) ROUTE("POST", URI)
 #define ROUTE_END()                                                            \
   }                                                                            \
   else HTTP_500;

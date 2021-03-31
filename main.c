@@ -66,7 +66,7 @@ int read_file(const char *file_name) {
 void route() {
   ROUTE_START()
 
-  ROUTE_GET("/") {
+  GET("/") {
     char index_html[20];
     sprintf(index_html, "%s%s", PUBLIC_DIR, INDEX_HTML);
 
@@ -78,7 +78,7 @@ void route() {
     }
   }
 
-  ROUTE_GET("/test") {
+  GET("/test") {
     HTTP_200;
     printf("List of request headers:\n\n");
 
@@ -90,14 +90,14 @@ void route() {
     }
   }
 
-  ROUTE_POST("/") {
+  POST("/") {
     HTTP_201;
     printf("Wow, seems that you POSTed %d bytes.\n", payload_size);
     printf("Fetch the data using `payload` variable.\n");
     if (payload_size > 0) printf("Request body: %s", payload);
   }
 
-  ROUTE_GET(uri) {
+  GET(uri) {
     char file_name[255];
     sprintf(file_name, "%s%s", PUBLIC_DIR, uri);
 
