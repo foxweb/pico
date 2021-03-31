@@ -11,16 +11,16 @@
 #define CHUNK_SIZE 1024 // read 1024 bytes at a time
 
 // Public directory settings
-#define PUBLIC_DIR     "./public"
-#define INDEX_HTML     "/index.html"
+#define PUBLIC_DIR "./public"
+#define INDEX_HTML "/index.html"
 #define NOT_FOUND_HTML "/404.html"
 
 // Client request
-extern char *method,    // "GET" or "POST"
-            *uri,       // "/index.html" things before '?'
-            *qs,        // "a=1&b=2" things after  '?'
-            *prot,      // "HTTP/1.1"
-            *payload;   // for POST
+extern char *method, // "GET" or "POST"
+    *uri,            // "/index.html" things before '?'
+    *qs,             // "a=1&b=2" things after  '?'
+    *prot,           // "HTTP/1.1"
+    *payload;        // for POST
 
 extern int payload_size;
 
@@ -31,12 +31,12 @@ int main(int c, char **v) {
 }
 
 int file_exists(const char *file_name) {
-    struct stat buffer;
-    int exist = stat(file_name, &buffer);
-    if (exist == 0)
-      return 1;
-    else
-      return 0;
+  struct stat buffer;
+  int exist = stat(file_name, &buffer);
+  if (exist == 0)
+    return 1;
+  else
+    return 0;
 }
 
 int read_file(const char *file_name) {
@@ -48,14 +48,12 @@ int read_file(const char *file_name) {
 
   if (file) {
     while ((nread = fread(buf, 1, sizeof buf, file)) > 0)
+      fwrite(buf, 1, nread, stdout);
 
-    fwrite(buf, 1, nread, stdout);
-
-    if (ferror(file)) {
+    if (ferror(file))
       return 1;
-    } else {
+    else
       return 0;
-    }
 
     fclose(file);
   } else {
@@ -94,7 +92,8 @@ void route() {
     HTTP_201;
     printf("Wow, seems that you POSTed %d bytes.\n", payload_size);
     printf("Fetch the data using `payload` variable.\n");
-    if (payload_size > 0) printf("Request body: %s", payload);
+    if (payload_size > 0)
+      printf("Request body: %s", payload);
   }
 
   GET(uri) {
@@ -107,7 +106,8 @@ void route() {
     } else {
       HTTP_404;
       sprintf(file_name, "%s%s", PUBLIC_DIR, NOT_FOUND_HTML);
-      if (file_exists(file_name)) read_file(file_name);
+      if (file_exists(file_name))
+        read_file(file_name);
     }
   }
 

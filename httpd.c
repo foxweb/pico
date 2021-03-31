@@ -18,15 +18,14 @@ int *clients;
 static void start_server(const char *);
 static void respond(int);
 
-
 static char *buf;
 
 // Client request
-char *method,  // "GET" or "POST"
-     *uri,     // "/index.html" things before '?'
-     *qs,      // "a=1&b=2" things after  '?'
-     *prot,    // "HTTP/1.1"
-     *payload; // for POST
+char *method, // "GET" or "POST"
+    *uri,     // "/index.html" things before '?'
+    *qs,      // "a=1&b=2" things after  '?'
+    *prot,    // "HTTP/1.1"
+    *payload; // for POST
 
 int payload_size;
 
