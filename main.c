@@ -10,8 +10,10 @@
 
 #define CHUNK_SIZE 1024 // read 1024 bytes at a time
 
-#define PUBLIC_DIR "./public"
-#define INDEX_HTML "/index.html"
+// Public directory settings
+#define PUBLIC_DIR     "./public"
+#define INDEX_HTML     "/index.html"
+#define NOT_FOUND_HTML "/404.html"
 
 // Client request
 extern char *method,    // "GET" or "POST"
@@ -104,6 +106,8 @@ void route() {
       read_file(file_name);
     } else {
       HTTP_404;
+      sprintf(file_name, "%s%s", PUBLIC_DIR, NOT_FOUND_HTML);
+      if (file_exists(file_name)) read_file(file_name);
     }
   }
 
