@@ -1,0 +1,27 @@
+# I suggest using Siege utility for testing and benchmarking the HTTP-server.
+#
+# https://github.com/JoeDog/siege
+#
+# siege -i -f urls.txt
+#
+http://localhost:8000/
+http://localhost:8000/ POST first_name=Aleksey last_name=Kurepin
+http://localhost:8000/test
+http://localhost:8000/404.html
+http://localhost:8000/LICENSE.txt
+http://localhost:8000/browserconfig.xml
+http://localhost:8000/css
+http://localhost:8000/css/main.css
+http://localhost:8000/css/normalize.css
+http://localhost:8000/doc
+http://localhost:8000/favicon.ico
+http://localhost:8000/humans.txt
+http://localhost:8000/icon.png
+http://localhost:8000/img
+http://localhost:8000/index.html
+http://localhost:8000/js
+http://localhost:8000/js/main.js
+http://localhost:8000/js/plugins.js
+# http://localhost:8000/package-lock.json - bug detected: very big file for benchmarking
+http://localhost:8000/package.json
+http://localhost:8000/robots.txt
