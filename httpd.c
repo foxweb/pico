@@ -1,6 +1,7 @@
 #include "httpd.h"
 
 #include <arpa/inet.h>
+#include <ctype.h>
 #include <netdb.h>
 #include <signal.h>
 #include <stdio.h>
@@ -9,7 +10,6 @@
 #include <sys/mman.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <ctype.h>
 
 #define MAX_CONNECTIONS 1000
 #define BUF_SIZE 65535
@@ -130,29 +130,31 @@ char *request_header(const char *name) {
 header_t *request_headers(void) { return reqhdr; }
 
 // Handle escape characters (%xx)
-static void uri_unescape(char *uri)
-{
-  char  chr = 0;
+static void uri_unescape(char *uri) {
+  char chr = 0;
   char *src = uri;
   char *dst = uri;
 
   // Skip inital non encoded character
-  while(*src && !isspace((int)(*src)) && (*src != '%'))
-    src++; 
+  while (*src && !isspace((int)(*src)) && (*src != '%'))
+    src++;
 
   // Replace encoded characters with corresponding code.
   dst = src;
-  while(*src && !isspace((int)(*src))) {
-    if (*src == '+') chr = ' ';
+  while (*src && !isspace((int)(*src))) {
+    if (*src == '+')
+      chr = ' ';
     else if ((*src == '%') && src[1] && src[2]) {
-      src++; chr  = ((*src & 0x0F) + 9 * (*src > '9')) * 16;
-      src++; chr += ((*src & 0x0F) + 9 * (*src > '9'));
-    }
-    else chr = *src;
-   *dst++ = chr;
+      src++;
+      chr = ((*src & 0x0F) + 9 * (*src > '9')) * 16;
+      src++;
+      chr += ((*src & 0x0F) + 9 * (*src > '9'));
+    } else
+      chr = *src;
+    *dst++ = chr;
     src++;
   }
-  *dst ='\0';
+  *dst = '\0';
 }
 
 // client connection
