@@ -130,22 +130,29 @@ char *request_header(const char *name) {
 header_t *request_headers(void) { return reqhdr; }
 
 // Handle escape characters (%xx)
-static void uri_unescape(char *s)
+static void uri_unescape(char *uri)
 {
-  char c = 0;
-  char *t = s;
+  char  chr = 0;
+  char *src = uri;
+  char *dst = uri;
 
-  while(*s && !isspace((int)(*s))) {
-    if (*s == '+') c = ' ';
-    else if (*s == '%' && s[1] && s[2]) {
-      s++; c  = ((*s & 0x0F) + 9 * (*s > '9')) * 16;
-      s++; c += ((*s & 0x0F) + 9 * (*s > '9'));
+  // Skip inital non encoded character
+  while(*src && !isspace((int)(*src)) && (*src != '%'))
+    src++; 
+
+  // Replace encoded characters with corresponding code.
+  dst = src;
+  while(*src && !isspace((int)(*src))) {
+    if (*src == '+') chr = ' ';
+    else if ((*src == '%') && src[1] && src[2]) {
+      src++; chr  = ((*src & 0x0F) + 9 * (*src > '9')) * 16;
+      src++; chr += ((*src & 0x0F) + 9 * (*src > '9'));
     }
-    else c = *s;
-    *t++ = c;
-    s++;
+    else chr = *src;
+    *dst++ = chr;
+    src++;
   }
-  *t ='\0';
+  *dst ='\0';
 }
 
 // client connection
@@ -178,7 +185,7 @@ void respond(int n) {
       qs = uri - 1; // use an empty string
 
     header_t *h = reqhdr;
-    char *t, *t2;
+    char *dst, *t2;
     while (h < reqhdr + 16) {
       char *k, *v;
 
@@ -194,14 +201,14 @@ void respond(int n) {
       h->value = v;
       h++;
       fprintf(stderr, "[H] %s: %s\n", k, v);
-      t = v + 1 + strlen(v);
-      if (t[1] == '\r' && t[2] == '\n')
+      dst = v + 1 + strlen(v);
+      if (dst[1] == '\r' && dst[2] == '\n')
         break;
     }
-    t = strtok(NULL, "\r\n");
+    dst = strtok(NULL, "\r\n");
     t2 = request_header("Content-Length"); // and the related header if there is
-    payload = t;
-    payload_size = t2 ? atol(t2) : (rcvd - (t - buf));
+    payload = dst;
+    payload_size = t2 ? atol(t2) : (rcvd - (dst - buf));
 
     // bind clientfd to stdout, making it easier to write
     clientfd = clients[n];
