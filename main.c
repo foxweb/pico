@@ -32,17 +32,18 @@ int main(int c, char **v) {
 
 int file_exists(const char *file_name) {
   struct stat buffer;
-  int exist = stat(file_name, &buffer);
-  if (exist == 0)
-    return 1;
-  else
-    return 0;
+  int exist;
+  
+  exist = (stat(file_name, &buffer) == 0);
+
+  return exist;
 }
 
 int read_file(const char *file_name) {
   char buf[CHUNK_SIZE];
   FILE *file;
   size_t nread;
+  int err = 1;
 
   file = fopen(file_name, "r");
 
@@ -50,14 +51,10 @@ int read_file(const char *file_name) {
     while ((nread = fread(buf, 1, sizeof buf, file)) > 0)
       fwrite(buf, 1, nread, stdout);
 
-    if (ferror(file))  return 1;
-    
+    err = ferror(file);
     fclose(file);
-    return 0;
-
   }
-  return 1;
-
+  return err;
 }
 
 void route() {
