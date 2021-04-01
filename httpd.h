@@ -36,11 +36,6 @@ void route();
 #define HTTP_404 printf("%s 404 Not found\n\n", RESPONSE_PROTOCOL)
 #define HTTP_500 printf("%s 500 Internal Server Error\n\n", RESPONSE_PROTOCOL)
 
-// Public directory settings
-#define PUBLIC_DIR     "./public"
-#define INDEX_HTML     "/index.html"
-#define NOT_FOUND_HTML "/404.html"
-
 // some interesting macro for `route()`
 #define ROUTE_START() if (0) {
 #define ROUTE(METHOD, URI)                                                     \

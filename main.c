@@ -3,6 +3,12 @@
 
 #define CHUNK_SIZE 1024 // read 1024 bytes at a time
 
+// Public directory settings
+#define PUBLIC_DIR     "./public"
+#define INDEX_HTML     "/index.html"
+#define NOT_FOUND_HTML "/404.html"
+
+
 int main(int c, char **v) {
   char *port = c == 1 ? "8000" : v[1];
   serve_forever(port);
@@ -11,11 +17,11 @@ int main(int c, char **v) {
 
 int file_exists(const char *file_name) {
   struct stat buffer;
-  int exist;
+  int exists;
   
-  exist = (stat(file_name, &buffer) == 0);
+  exists = (stat(file_name, &buffer) == 0);
 
-  return exist;
+  return exists;
 }
 
 int read_file(const char *file_name) {
