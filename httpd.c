@@ -185,7 +185,7 @@ void respond(int n) {
       qs = uri - 1; // use an empty string
 
     header_t *h = reqhdr;
-    char *dst, *t2;
+    char *t, *t2;
     while (h < reqhdr + 16) {
       char *k, *v;
 
@@ -201,14 +201,14 @@ void respond(int n) {
       h->value = v;
       h++;
       fprintf(stderr, "[H] %s: %s\n", k, v);
-      dst = v + 1 + strlen(v);
-      if (dst[1] == '\r' && dst[2] == '\n')
+      t = v + 1 + strlen(v);
+      if (t[1] == '\r' && t[2] == '\n')
         break;
     }
-    dst = strtok(NULL, "\r\n");
+    t = strtok(NULL, "\r\n");
     t2 = request_header("Content-Length"); // and the related header if there is
-    payload = dst;
-    payload_size = t2 ? atol(t2) : (rcvd - (dst - buf));
+    payload = t;
+    payload_size = t2 ? atol(t2) : (rcvd - (t - buf));
 
     // bind clientfd to stdout, making it easier to write
     clientfd = clients[n];
