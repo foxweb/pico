@@ -9,6 +9,7 @@
 #include <sys/mman.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #define MAX_CONNECTIONS 1000
 #define BUF_SIZE 65535
@@ -128,6 +129,32 @@ char *request_header(const char *name) {
 // get all request headers
 header_t *request_headers(void) { return reqhdr; }
 
+// Handle escape characters (%xx)
+static void uri_unescape(char *uri)
+{
+  char  chr = 0;
+  char *src = uri;
+  char *dst = uri;
+
+  // Skip inital non encoded character
+  while(*src && !isspace((int)(*src)) && (*src != '%'))
+    src++; 
+
+  // Replace encoded characters with corresponding code.
+  dst = src;
+  while(*src && !isspace((int)(*src))) {
+    if (*src == '+') chr = ' ';
+    else if ((*src == '%') && src[1] && src[2]) {
+      src++; chr  = ((*src & 0x0F) + 9 * (*src > '9')) * 16;
+      src++; chr += ((*src & 0x0F) + 9 * (*src > '9'));
+    }
+    else chr = *src;
+   *dst++ = chr;
+    src++;
+  }
+  *dst ='\0';
+}
+
 // client connection
 void respond(int n) {
   int rcvd;
@@ -146,6 +173,8 @@ void respond(int n) {
     method = strtok(buf, " \t\r\n");
     uri = strtok(NULL, " \t");
     prot = strtok(NULL, " \t\r\n");
+
+    uri_unescape(uri);
 
     fprintf(stderr, "\x1b[32m + [%s] %s\x1b[0m\n", method, uri);
 
