@@ -9,6 +9,7 @@
 #include <sys/mman.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #define MAX_CONNECTIONS 1000
 #define BUF_SIZE 65535
@@ -128,6 +129,25 @@ char *request_header(const char *name) {
 // get all request headers
 header_t *request_headers(void) { return reqhdr; }
 
+// Handle escape characters (%xx)
+static void uri_unescape(char *s)
+{
+  char c = 0;
+  char *t = s;
+
+  while(*s && !isspace((int)(*s))) {
+    if (*s == '+') c = ' ';
+    else if (*s == '%' && s[1] && s[2]) {
+      s++; c  = ((*s & 0x0F) + 9 * (*s > '9')) * 16;
+      s++; c += ((*s & 0x0F) + 9 * (*s > '9'));
+    }
+    else c = *s;
+    *t++ = c;
+    s++;
+  }
+  *t ='\0';
+}
+
 // client connection
 void respond(int n) {
   int rcvd;
@@ -149,6 +169,7 @@ void respond(int n) {
 
     fprintf(stderr, "\x1b[32m + [%s] %s\x1b[0m\n", method, uri);
 
+    uri_unescape(uri);
     qs = strchr(uri, '?');
 
     if (qs)
