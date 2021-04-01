@@ -149,7 +149,7 @@ static void uri_unescape(char *uri)
       src++; chr += ((*src & 0x0F) + 9 * (*src > '9'));
     }
     else chr = *src;
-    *dst++ = chr;
+   *dst++ = chr;
     src++;
   }
   *dst ='\0';
@@ -174,9 +174,10 @@ void respond(int n) {
     uri = strtok(NULL, " \t");
     prot = strtok(NULL, " \t\r\n");
 
+    uri_unescape(uri);
+
     fprintf(stderr, "\x1b[32m + [%s] %s\x1b[0m\n", method, uri);
 
-    uri_unescape(uri);
     qs = strchr(uri, '?');
 
     if (qs)
