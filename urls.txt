@@ -25,3 +25,4 @@ http://localhost:8000/js/plugins.js
 # http://localhost:8000/package-lock.json - bug detected: very big file for benchmarking
 http://localhost:8000/package.json
 http://localhost:8000/robots.txt
+http://localhost:8000/%D0%9F%D1%80%D0%B8%D0%B2%D0%B5%D1%82.html
