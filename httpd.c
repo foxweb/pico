@@ -16,7 +16,6 @@
 #define QUEUE_SIZE 1000000
 
 static int listenfd;
-static int clientfd;
 int *clients;
 static void start_server(const char *);
 static void respond(int);
@@ -66,7 +65,8 @@ void serve_forever(const char *PORT) {
       if (fork() == 0) {
         close(listenfd);
         respond(slot);
-        close(clients[slot]);
+        close(clients[slot]); 
+        clients[slot] = -1; 
         exit(0);
       } else {
         close(clients[slot]);
@@ -158,11 +158,11 @@ static void uri_unescape(char *uri) {
 }
 
 // client connection
-void respond(int n) {
+void respond(int slot) {
   int rcvd;
 
   buf = malloc(BUF_SIZE);
-  rcvd = recv(clients[n], buf, BUF_SIZE, 0);
+  rcvd = recv(clients[slot], buf, BUF_SIZE, 0);
 
   if (rcvd < 0) // receive error
     fprintf(stderr, ("recv() error\n"));
@@ -190,21 +190,21 @@ void respond(int n) {
     header_t *h = reqhdr;
     char *t, *t2;
     while (h < reqhdr + 16) {
-      char *k, *v;
+      char *key, *val;
 
-      k = strtok(NULL, "\r\n: \t");
-      if (!k)
+      key = strtok(NULL, "\r\n: \t");
+      if (!key)
         break;
 
-      v = strtok(NULL, "\r\n");
-      while (*v && *v == ' ')
-        v++;
+      val = strtok(NULL, "\r\n");
+      while (*val && *val == ' ')
+        val++;
 
-      h->name = k;
-      h->value = v;
+      h->name = key;
+      h->value = val;
       h++;
-      fprintf(stderr, "[H] %s: %s\n", k, v);
-      t = v + 1 + strlen(v);
+      fprintf(stderr, "[H] %s: %s\n", key, val);
+      t = val + 1 + strlen(val);
       if (t[1] == '\r' && t[2] == '\n')
         break;
     }
@@ -214,7 +214,7 @@ void respond(int n) {
     payload_size = t2 ? atol(t2) : (rcvd - (t - buf));
 
     // bind clientfd to stdout, making it easier to write
-    clientfd = clients[n];
+    int clientfd = clients[slot];
     dup2(clientfd, STDOUT_FILENO);
     close(clientfd);
 
@@ -226,13 +226,6 @@ void respond(int n) {
     shutdown(STDOUT_FILENO, SHUT_WR);
     close(STDOUT_FILENO);
   }
-
-  // Closing SOCKET
-  shutdown(
-      clientfd,
-      SHUT_RDWR); // All further send and recieve operations are DISABLED...
-  close(clientfd);
-  clients[n] = -1;
-
+  
   free(buf);
 }
