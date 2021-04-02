@@ -1,3 +1,5 @@
+CFLAGS= -O2 -Wall
+
 all: server
 
 clean:
@@ -8,8 +10,8 @@ server: main.o httpd.o
 	gcc -o server $^
 
 main.o: main.c httpd.h
-	gcc -c -o main.o main.c
+	gcc $(CFLAGS) -c -o $*.o $*.c
 
 httpd.o: httpd.c httpd.h
-	gcc -c -o httpd.o httpd.c
+	gcc $(CFLAGS) -c -o $*.o $*.c
 
