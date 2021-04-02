@@ -84,8 +84,8 @@ void serve_forever(const char *PORT) {
       if (fork() == 0) {
         close(listenfd);
         respond(slot);
-        close(clients[slot]); 
-        clients[slot] = -1; 
+        close(clients[slot]);
+        clients[slot] = -1;
         exit(0);
       } else {
         close(clients[slot]);
@@ -242,6 +242,6 @@ void respond(int slot) {
     shutdown(STDOUT_FILENO, SHUT_WR);
     close(STDOUT_FILENO);
   }
-  
+
   free(buf);
 }

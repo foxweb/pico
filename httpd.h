@@ -5,11 +5,11 @@
 #include <string.h>
 
 // Client request
-extern char *method,  // "GET" or "POST"
-            *uri,     // "/index.html" things before '?'
-            *qs,      // "a=1&b=2" things after  '?'
-            *prot,    // "HTTP/1.1"
-            *payload; // for POST
+extern char *method, // "GET" or "POST"
+    *uri,            // "/index.html" things before '?'
+    *qs,             // "a=1&b=2" things after  '?'
+    *prot,           // "HTTP/1.1"
+    *payload;        // for POST
 
 extern int payload_size;
 
