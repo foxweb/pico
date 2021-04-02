@@ -22,14 +22,17 @@ static int listenfd;
 int *clients;
 static char *buf;
 
+static header_t reqhdr[17] = {{"\0", "\0"}};
+
 // Client request
-char *method,  // "GET" or "POST"
+char *method_str,  // "GET" or "POST"
      *uri,     // "/index.html" things before '?'
      *qs,      // "a=1&b=2" things after  '?'
      *prot,    // "HTTP/1.1"
      *payload; // for POST
 
 int payload_size;
+int method;
 
 int nxt_slot(int slot)
 {
@@ -160,7 +163,7 @@ static void uri_unescape(char *uri) {
   while (*src && !isspace((int)(*src))) {
     if (*src == '+')
       chr = ' ';
-    else if ((*src == '%') && src[1] && src[2]) {
+    else if ((*src == '%') && isxdigit((int)(src[1])) && isxdigit((int)(src[2]))) {
       src++;
       chr = ((*src & 0x0F) + 9 * (*src > '9')) * 16;
       src++;
@@ -171,6 +174,25 @@ static void uri_unescape(char *uri) {
     src++;
   }
   *dst = '\0';
+}
+
+static int method_code(char *meth)
+{
+  int code;
+
+  switch (*meth) {
+    case 'P' : code = (meth[1] == 'O') ? METHOD_POST : METHOD_PUT;
+               break;
+
+    case 'G' : code = METHOD_GET;      break;
+    case 'H' : code = METHOD_HEAD;     break;
+    case 'D' : code = METHOD_DELETE;   break;
+    case 'O' : code = METHOD_OPTIONS;  break;
+    case 'T' : code = METHOD_TRACE;    break;
+    default  : code = METHOD_NONE;     break;
+  }
+
+  return code;
 }
 
 // client connection
@@ -188,13 +210,15 @@ void respond(int slot) {
   {
     buf[rcvd] = '\0';
 
-    method = strtok(buf, " \t\r\n");
+    method_str = strtok(buf, " \t\r\n");
+    method = method_code(method_str);
+
     uri = strtok(NULL, " \t");
     prot = strtok(NULL, " \t\r\n");
 
     uri_unescape(uri);
 
-    fprintf(stderr, "\x1b[32m + [%s] %s\x1b[0m\n", method, uri);
+    fprintf(stderr, "\x1b[32m + [%s] %s\x1b[0m\n", METHOD_STR(method), uri);
 
     qs = strchr(uri, '?');
 
