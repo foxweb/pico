@@ -11,51 +11,70 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#define MAX_CONNECTIONS 1000
+// Use (2^n-1) to speedup modulo
+#define MAX_CONNECTIONS 1023
 #define BUF_SIZE 65535
-#define QUEUE_SIZE 1000000
 
-static int listenfd;
-int *clients;
 static void start_server(const char *);
 static void respond(int);
 
+static int listenfd;
+int *clients;
 static char *buf;
 
 // Client request
-char *method, // "GET" or "POST"
-    *uri,     // "/index.html" things before '?'
-    *qs,      // "a=1&b=2" things after  '?'
-    *prot,    // "HTTP/1.1"
-    *payload; // for POST
+char *method,  // "GET" or "POST"
+     *uri,     // "/index.html" things before '?'
+     *qs,      // "a=1&b=2" things after  '?'
+     *prot,    // "HTTP/1.1"
+     *payload; // for POST
 
 int payload_size;
+
+int nxt_slot(int slot)
+{
+    int nxt_slot = slot;
+
+    do {
+      nxt_slot = (nxt_slot + 1) & MAX_CONNECTIONS;
+
+      if (nxt_slot == slot) {  // There is no slot available for a new client!
+        fprintf(stderr,"WARNING: no available connection\n");
+        usleep(250); // Let's wait some millisecond
+      }
+    } while (clients[nxt_slot] != -1);
+
+    return nxt_slot; 
+}
+
 
 void serve_forever(const char *PORT) {
   struct sockaddr_in clientaddr;
   socklen_t addrlen;
 
-  int slot = 0;
+  int slot = -1;
 
   printf("Server started %shttp://127.0.0.1:%s%s\n", "\033[92m", PORT,
          "\033[0m");
 
   // create shared memory for client slot array
-  clients = mmap(NULL, sizeof(*clients) * MAX_CONNECTIONS,
+  clients = mmap(NULL, sizeof(*clients) * (MAX_CONNECTIONS+1),
                  PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, -1, 0);
 
   // Setting all elements to -1: signifies there is no client connected
-  int i;
-  for (i = 0; i < MAX_CONNECTIONS; i++)
+  for (int i = 0; i <= MAX_CONNECTIONS; i++)
     clients[i] = -1;
+
   start_server(PORT);
 
   // Ignore SIGCHLD to avoid zombie threads
   signal(SIGCHLD, SIG_IGN);
 
   // ACCEPT connections
+  addrlen = sizeof(clientaddr);
   while (1) {
-    addrlen = sizeof(clientaddr);
+    // Look for slot to be used for next client
+    slot = nxt_slot(slot);
     clients[slot] = accept(listenfd, (struct sockaddr *)&clientaddr, &addrlen);
 
     if (clients[slot] < 0) {
@@ -72,9 +91,6 @@ void serve_forever(const char *PORT) {
         close(clients[slot]);
       }
     }
-
-    while (clients[slot] != -1)
-      slot = (slot + 1) % MAX_CONNECTIONS;
   }
 }
 
@@ -109,7 +125,7 @@ void start_server(const char *port) {
   freeaddrinfo(res);
 
   // listen for incoming connections
-  if (listen(listenfd, QUEUE_SIZE) != 0) {
+  if (listen(listenfd, SOMAXCONN ) != 0) {
     perror("listen() error");
     exit(1);
   }
@@ -165,9 +181,9 @@ void respond(int slot) {
   rcvd = recv(clients[slot], buf, BUF_SIZE, 0);
 
   if (rcvd < 0) // receive error
-    fprintf(stderr, ("recv() error\n"));
+    fprintf(stderr, ("ERROR: recv() error\n"));
   else if (rcvd == 0) // receive socket closed
-    fprintf(stderr, "Client disconnected upexpectedly.\n");
+    fprintf(stderr, "INFO: Client disconnected.\n");
   else // message received
   {
     buf[rcvd] = '\0';
