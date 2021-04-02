@@ -52,7 +52,7 @@ void serve_forever(const char *PORT) {
   struct sockaddr_in clientaddr;
   socklen_t addrlen;
 
-  int slot = -1;
+  int slot = 0;
 
   printf("Server started %shttp://127.0.0.1:%s%s\n", "\033[92m", PORT,
          "\033[0m");
@@ -73,8 +73,6 @@ void serve_forever(const char *PORT) {
   // ACCEPT connections
   addrlen = sizeof(clientaddr);
   while (1) {
-    // Look for slot to be used for next client
-    slot = nxt_slot(slot);
     clients[slot] = accept(listenfd, (struct sockaddr *)&clientaddr, &addrlen);
 
     if (clients[slot] < 0) {
@@ -91,6 +89,8 @@ void serve_forever(const char *PORT) {
         close(clients[slot]);
       }
     }
+    // Look for slot to be used for next client
+    slot = nxt_slot(slot);
   }
 }
 
