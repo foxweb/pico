@@ -1,28 +1,13 @@
 #include "httpd.h"
 #include <sys/stat.h>
 
-#define RESPONSE_PROTOCOL "HTTP/1.1"
-
-#define HTTP_200 printf("%s 200 OK\n\n", RESPONSE_PROTOCOL)
-#define HTTP_201 printf("%s 201 Created\n\n", RESPONSE_PROTOCOL)
-#define HTTP_404 printf("%s 404 Not found\n\n", RESPONSE_PROTOCOL)
-#define HTTP_500 printf("%s 500 Internal Server Error\n\n", RESPONSE_PROTOCOL)
-
 #define CHUNK_SIZE 1024 // read 1024 bytes at a time
 
 // Public directory settings
-#define PUBLIC_DIR "./public"
-#define INDEX_HTML "/index.html"
+#define PUBLIC_DIR     "./public"
+#define INDEX_HTML     "/index.html"
 #define NOT_FOUND_HTML "/404.html"
 
-// Client request
-extern char *method, // "GET" or "POST"
-    *uri,            // "/index.html" things before '?'
-    *qs,             // "a=1&b=2" things after  '?'
-    *prot,           // "HTTP/1.1"
-    *payload;        // for POST
-
-extern int payload_size;
 
 int main(int c, char **v) {
   char *port = c == 1 ? "8000" : v[1];
@@ -32,17 +17,18 @@ int main(int c, char **v) {
 
 int file_exists(const char *file_name) {
   struct stat buffer;
-  int exist = stat(file_name, &buffer);
-  if (exist == 0)
-    return 1;
-  else
-    return 0;
+  int exists;
+  
+  exists = (stat(file_name, &buffer) == 0);
+
+  return exists;
 }
 
 int read_file(const char *file_name) {
   char buf[CHUNK_SIZE];
   FILE *file;
   size_t nread;
+  int err = 1;
 
   file = fopen(file_name, "r");
 
@@ -50,15 +36,10 @@ int read_file(const char *file_name) {
     while ((nread = fread(buf, 1, sizeof buf, file)) > 0)
       fwrite(buf, 1, nread, stdout);
 
-    if (ferror(file))
-      return 1;
-    else
-      return 0;
-
+    err = ferror(file);
     fclose(file);
-  } else {
-    return 1;
   }
+  return err;
 }
 
 void route() {
