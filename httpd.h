@@ -5,7 +5,7 @@
 #include <string.h>
 
 // Client request
-extern char *method_str, // "GET" or "POST"
+extern char *methodstr, // "GET" or "POST"
             *uri,            // "/index.html" things before '?'
             *querystr,             // "a=1&b=2" things after  '?'
             *prot,           // "HTTP/1.1"
