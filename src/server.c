@@ -10,7 +10,7 @@
 
 int main(int c, char **v) {
   char *port = c == 1 ? "8000" : v[1];
-  serve_forever(port);
+  httpd_start(port);
   return 0;
 }
 
@@ -41,10 +41,11 @@ int read_file(const char *file_name) {
   return err;
 }
 
-void route() {
-  ROUTE_START()
+void httpd_route()
+{
+ // ROUTE_START()
 
-  GET("/") {
+  HTTPD_GET("/") {
     char index_html[20];
     sprintf(index_html, "%s%s", PUBLIC_DIR, INDEX_HTML);
 
@@ -56,7 +57,7 @@ void route() {
     }
   }
 
-  GET("/test") {
+  HTTPD_GET("/test") {
     HTTP_200;
     printf("List of request headers:\n\n");
 
@@ -68,7 +69,7 @@ void route() {
     }
   }
 
-  POST("/") {
+  HTTPD_POST("/") {
     HTTP_201;
     printf("Wow, seems that you POSTed %d bytes.\n", payload_size);
     printf("Fetch the data using `payload` variable.\n");
@@ -76,7 +77,7 @@ void route() {
       printf("Request body: %s", payload);
   }
 
-  GET(uri) {
+  HTTPD_GET(uri) {
     char file_name[255];
     sprintf(file_name, "%s%s", PUBLIC_DIR, uri);
 
@@ -91,5 +92,7 @@ void route() {
     }
   }
 
-  ROUTE_END()
+  HTTPD_DEFAULT() {
+    HTTP_500;
+  }
 }
