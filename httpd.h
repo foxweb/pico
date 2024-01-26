@@ -6,10 +6,10 @@
 
 // Client request
 extern char *methodstr, // "GET" or "POST"
-            *uri,            // "/index.html" things before '?'
-            *querystr,             // "a=1&b=2" things after  '?'
-            *prot,           // "HTTP/1.1"
-            *payload;        // for POST
+    *uri,               // "/index.html" things before '?'
+    *querystr,          // "a=1&b=2" things after  '?'
+    *prot,              // "HTTP/1.1"
+    *payload;           // for POST
 
 extern int payload_size;
 
@@ -24,24 +24,25 @@ typedef struct {
 
 header_t *request_headers(void);
 
-#define METHOD_NONE    0
-#define METHOD_GET     1
-#define METHOD_POST    2
-#define METHOD_HEAD    3
-#define METHOD_DELETE  4
+#define METHOD_NONE 0
+#define METHOD_GET 1
+#define METHOD_POST 2
+#define METHOD_HEAD 3
+#define METHOD_DELETE 4
 #define METHOD_OPTIONS 5
-#define METHOD_PUT     6
-#define METHOD_TRACE   7
+#define METHOD_PUT 6
+#define METHOD_TRACE 7
 
-#define METHOD_STR(m)  "NONE\0   " \
-                       "GET\0    " \
-                       "POST\0   " \
-                       "HEAD\0   " \
-                       "DELETE\0 " \
-                       "OPTIONS\0" \
-                       "PUT\0    " \
-                       "TRACE\0  " \
-                     + (((m) & 0x07)*8)
+#define METHOD_STR(m)                                                          \
+  "NONE\0   "                                                                  \
+  "GET\0    "                                                                  \
+  "POST\0   "                                                                  \
+  "HEAD\0   "                                                                  \
+  "DELETE\0 "                                                                  \
+  "OPTIONS\0"                                                                  \
+  "PUT\0    "                                                                  \
+  "TRACE\0  " +                                                                \
+      (((m)&0x07) * 8)
 
 extern int method;
 
@@ -62,7 +63,7 @@ void route();
 #define ROUTE_START() if (0) {
 #define ROUTE(METHOD, URI)                                                     \
   }                                                                            \
-  else if ((METHOD == method) && strcmp(URI, uri) == 0 ) {
+  else if ((METHOD == method) && strcmp(URI, uri) == 0) {
 #define GET(URI) ROUTE(METHOD_GET, URI)
 #define POST(URI) ROUTE(METHOD_POST, URI)
 #define HEAD(URI) ROUTE(METHOD_HEAD, URI)

@@ -25,31 +25,29 @@ static char *buf;
 static header_t reqhdr[17] = {{"\0", "\0"}};
 
 // Client request
-char *method_str,  // "GET" or "POST"
-     *uri,     // "/index.html" things before '?'
-     *qs,      // "a=1&b=2" things after  '?'
-     *prot,    // "HTTP/1.1"
-     *payload; // for POST
+char *method_str, // "GET" or "POST"
+    *uri,         // "/index.html" things before '?'
+    *qs,          // "a=1&b=2" things after  '?'
+    *prot,        // "HTTP/1.1"
+    *payload;     // for POST
 
 int payload_size;
 int method;
 
-int nxt_slot(int slot)
-{
-    int nxt_slot = slot;
+int nxt_slot(int slot) {
+  int nxt_slot = slot;
 
-    do {
-      nxt_slot = (nxt_slot + 1) & MAX_CONNECTIONS;
+  do {
+    nxt_slot = (nxt_slot + 1) & MAX_CONNECTIONS;
 
-      if (nxt_slot == slot) {  // There is no slot available for a new client!
-        fprintf(stderr,"WARNING: no available connection\n");
-        usleep(250); // Let's wait some millisecond
-      }
-    } while (clients[nxt_slot] != -1);
+    if (nxt_slot == slot) { // There is no slot available for a new client!
+      fprintf(stderr, "WARNING: no available connection\n");
+      usleep(250); // Let's wait some millisecond
+    }
+  } while (clients[nxt_slot] != -1);
 
-    return nxt_slot; 
+  return nxt_slot;
 }
-
 
 void serve_forever(const char *PORT) {
   struct sockaddr_in clientaddr;
@@ -61,7 +59,7 @@ void serve_forever(const char *PORT) {
          "\033[0m");
 
   // create shared memory for client slot array
-  clients = mmap(NULL, sizeof(*clients) * (MAX_CONNECTIONS+1),
+  clients = mmap(NULL, sizeof(*clients) * (MAX_CONNECTIONS + 1),
                  PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, -1, 0);
 
   // Setting all elements to -1: signifies there is no client connected
@@ -128,7 +126,7 @@ void start_server(const char *port) {
   freeaddrinfo(res);
 
   // listen for incoming connections
-  if (listen(listenfd, SOMAXCONN ) != 0) {
+  if (listen(listenfd, SOMAXCONN) != 0) {
     perror("listen() error");
     exit(1);
   }
@@ -163,7 +161,8 @@ static void uri_unescape(char *uri) {
   while (*src && !isspace((int)(*src))) {
     if (*src == '+')
       chr = ' ';
-    else if ((*src == '%') && isxdigit((int)(src[1])) && isxdigit((int)(src[2]))) {
+    else if ((*src == '%') && isxdigit((int)(src[1])) &&
+             isxdigit((int)(src[2]))) {
       src++;
       chr = ((*src & 0x0F) + 9 * (*src > '9')) * 16;
       src++;
@@ -176,20 +175,32 @@ static void uri_unescape(char *uri) {
   *dst = '\0';
 }
 
-static int method_code(char *meth)
-{
+static int method_code(char *meth) {
   int code;
 
   switch (*meth) {
-    case 'P' : code = (meth[1] == 'O') ? METHOD_POST : METHOD_PUT;
-               break;
+  case 'P':
+    code = (meth[1] == 'O') ? METHOD_POST : METHOD_PUT;
+    break;
 
-    case 'G' : code = METHOD_GET;      break;
-    case 'H' : code = METHOD_HEAD;     break;
-    case 'D' : code = METHOD_DELETE;   break;
-    case 'O' : code = METHOD_OPTIONS;  break;
-    case 'T' : code = METHOD_TRACE;    break;
-    default  : code = METHOD_NONE;     break;
+  case 'G':
+    code = METHOD_GET;
+    break;
+  case 'H':
+    code = METHOD_HEAD;
+    break;
+  case 'D':
+    code = METHOD_DELETE;
+    break;
+  case 'O':
+    code = METHOD_OPTIONS;
+    break;
+  case 'T':
+    code = METHOD_TRACE;
+    break;
+  default:
+    code = METHOD_NONE;
+    break;
   }
 
   return code;
