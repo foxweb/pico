@@ -78,7 +78,7 @@ void route() {
 
   GET(uri) {
     char file_name[255];
-    sprintf(file_name, "%s%s", PUBLIC_DIR, uri);
+    snprintf(file_name, sizeof(file_name), "%s%s", PUBLIC_DIR, uri);
 
     if (file_exists(file_name)) {
       HTTP_200;
