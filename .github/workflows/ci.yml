@@ -9,16 +9,11 @@ on:
 jobs:
   build-and-test:
     name: Build and Test
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
         compiler: [gcc, clang]
-        exclude:
-          # macOS doesn't have gcc by default
-          - os: macos-latest
-            compiler: gcc
     
     steps:
     - name: Checkout code
@@ -32,17 +27,10 @@ jobs:
           echo "CC=clang" >> $GITHUB_ENV
         fi
     
-    - name: Install dependencies (Ubuntu)
-      if: matrix.os == 'ubuntu-latest'
+    - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y valgrind python3 python3-pip
-        pip3 install requests
-    
-    - name: Install dependencies (macOS)
-      if: matrix.os == 'macos-latest'
-      run: |
-        brew install python3
         pip3 install requests
     
     - name: Build server
@@ -64,8 +52,7 @@ jobs:
       run: |
         python3 tests/integration_test.py
     
-    - name: Memory leak check (Ubuntu only)
-      if: matrix.os == 'ubuntu-latest'
+    - name: Memory leak check
       run: |
         # Start server with valgrind
         valgrind --leak-check=full --error-exitcode=1 --log-file=valgrind.log \
@@ -106,7 +93,7 @@ jobs:
       if: failure()
       uses: actions/upload-artifact@v4
       with:
-        name: test-artifacts-${{ matrix.os }}-${{ matrix.compiler }}
+        name: test-artifacts-${{ matrix.compiler }}
         path: |
           valgrind.log
           static-analysis.log

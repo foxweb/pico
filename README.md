@@ -26,11 +26,11 @@ A minimal HTTP server for Unix/Linux systems using fork-based concurrency. Simpl
 
 ## Security Features
 
-✅ Path traversal attack prevention
-✅ Buffer overflow protection
-✅ Format string vulnerability fixes
-✅ NULL pointer dereference checks
-✅ Input validation for HTTP requests
+✅ Path traversal attack prevention  
+✅ Buffer overflow protection  
+✅ Format string vulnerability fixes  
+✅ NULL pointer dereference checks  
+✅ Input validation for HTTP requests  
 
 ## Quick Start
 
