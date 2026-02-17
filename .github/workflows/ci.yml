@@ -1,0 +1,219 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        compiler: [gcc, clang]
+        exclude:
+          # macOS doesn't have gcc by default
+          - os: macos-latest
+            compiler: gcc
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up environment
+      run: |
+        if [ "${{ matrix.compiler }}" = "gcc" ]; then
+          echo "CC=gcc" >> $GITHUB_ENV
+        else
+          echo "CC=clang" >> $GITHUB_ENV
+        fi
+    
+    - name: Install dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y valgrind python3 python3-pip
+        pip3 install requests
+    
+    - name: Install dependencies (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew install python3
+        pip3 install requests
+    
+    - name: Build server
+      run: |
+        make clean
+        make
+    
+    - name: Check for compilation warnings
+      run: |
+        make clean
+        make CFLAGS="-Wall -Wextra -Werror"
+    
+    - name: Run unit tests
+      run: |
+        gcc -o tests/test_main tests/test_main.c main.c -I. -DTESTING
+        ./tests/test_main
+    
+    - name: Run integration tests
+      run: |
+        python3 tests/integration_test.py
+    
+    - name: Memory leak check (Ubuntu only)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        # Start server with valgrind
+        valgrind --leak-check=full --error-exitcode=1 --log-file=valgrind.log \
+          ./server 9999 &
+        SERVER_PID=$!
+        
+        # Wait for server
+        sleep 2
+        
+        # Send test request
+        curl -s http://localhost:9999/ || true
+        
+        # Stop server
+        kill -INT $SERVER_PID
+        wait $SERVER_PID || true
+        
+        # Check results
+        if grep -q "definitely lost: 0 bytes" valgrind.log && \
+           grep -q "indirectly lost: 0 bytes" valgrind.log; then
+          echo "✓ No memory leaks detected"
+        else
+          echo "⚠ Memory leaks detected:"
+          cat valgrind.log
+          exit 1
+        fi
+    
+    - name: Static analysis with compiler
+      run: |
+        $CC -Wall -Wextra -pedantic -fsyntax-only main.c httpd.c 2>&1 | tee static-analysis.log
+        if [ -s static-analysis.log ]; then
+          echo "⚠ Static analysis warnings found"
+          cat static-analysis.log
+        else
+          echo "✓ No static analysis warnings"
+        fi
+    
+    - name: Upload artifacts on failure
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-artifacts-${{ matrix.os }}-${{ matrix.compiler }}
+        path: |
+          valgrind.log
+          static-analysis.log
+          tests/*.log
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Run cppcheck
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cppcheck
+        cppcheck --enable=all --error-exitcode=1 --suppress=missingIncludeSystem \
+          main.c httpd.c httpd.h 2>&1 | tee cppcheck.log || true
+        
+        # Show results but don't fail build on warnings
+        if [ -s cppcheck.log ]; then
+          echo "⚠ Cppcheck found issues:"
+          cat cppcheck.log
+        else
+          echo "✓ No cppcheck issues found"
+        fi
+    
+    - name: Check for common vulnerabilities
+      run: |
+        echo "Checking for common security issues..."
+        
+        # Check for unsafe functions
+        if grep -r "gets\|sprintf\|strcpy\|strcat\|scanf" *.c *.h; then
+          echo "❌ Found usage of unsafe functions"
+          exit 1
+        else
+          echo "✓ No unsafe function usage found"
+        fi
+        
+        # Check for TODO/FIXME related to security
+        if grep -ri "TODO.*security\|FIXME.*security\|XXX.*security" *.c *.h; then
+          echo "⚠ Found security-related TODOs"
+        else
+          echo "✓ No security TODOs found"
+        fi
+
+  documentation:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Check for required documentation
+      run: |
+        echo "Checking documentation..."
+        
+        files="README.md CONTRIBUTING.md SECURITY.md CHANGELOG.md"
+        missing=""
+        
+        for file in $files; do
+          if [ ! -f "$file" ]; then
+            missing="$missing $file"
+          fi
+        done
+        
+        if [ -n "$missing" ]; then
+          echo "❌ Missing documentation files:$missing"
+          exit 1
+        else
+          echo "✓ All required documentation files present"
+        fi
+    
+    - name: Validate markdown
+      run: |
+        echo "Checking markdown files..."
+        for file in *.md; do
+          if [ -f "$file" ]; then
+            # Basic check: file is not empty
+            if [ ! -s "$file" ]; then
+              echo "❌ $file is empty"
+              exit 1
+            fi
+            echo "✓ $file is valid"
+          fi
+        done
+
+  build-status:
+    name: Build Status
+    runs-on: ubuntu-latest
+    needs: [build-and-test, security-scan, documentation]
+    if: always()
+    
+    steps:
+    - name: Check build status
+      run: |
+        if [ "${{ needs.build-and-test.result }}" = "success" ] && \
+           [ "${{ needs.security-scan.result }}" = "success" ] && \
+           [ "${{ needs.documentation.result }}" = "success" ]; then
+          echo "✅ All checks passed!"
+          exit 0
+        else
+          echo "❌ Some checks failed"
+          echo "Build and Test: ${{ needs.build-and-test.result }}"
+          echo "Security Scan: ${{ needs.security-scan.result }}"
+          echo "Documentation: ${{ needs.documentation.result }}"
+          exit 1
+        fi
