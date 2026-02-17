@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Directory listing (nginx-like)** - Automatic index generation for directories
+  - Shows files and subdirectories with clickable links
+  - Displays file sizes in human-readable format (B, KB, MB, GB)
+  - Shows last modification dates
+  - Automatic index.html detection in subdirectories
+  - Parent directory navigation link
+  - Clean, responsive HTML table layout with CSS styling
+  - Tests for directory listing functionality
 - **HEAD method support** - Check resource existence without downloading content
   - `HEAD()` macro for defining HEAD routes
   - Example HEAD routes for `/`, `/test`, and static files
@@ -36,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI/CD configuration
 
 ### Changed
+- Refactored HTML templates into separate `templates.h` file for cleaner code
 - Simplified GitHub Actions workflow to Ubuntu-only (removed macOS builds)
 - Updated GitHub Actions workflow to use v4 of `actions/checkout` and `actions/upload-artifact`
 - Replaced `signal()` with `sigaction()` for more reliable signal handling

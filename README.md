@@ -17,6 +17,8 @@ A minimal HTTP server for Unix/Linux systems using fork-based concurrency. Simpl
 
 - Simple routing with `GET()`, `POST()`, and `HEAD()` macros
 - Static file serving from `./public` directory
+- **Directory listing** - nginx-like automatic index with file sizes and dates
+- **Auto index.html** - Automatic detection in subdirectories
 - Request header parsing and access
 - POST payload handling
 - HEAD method support for checking resource existence

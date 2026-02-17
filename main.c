@@ -1,10 +1,12 @@
 #include "httpd.h"
+#include "templates.h"
 #include <sys/stat.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <time.h>
 #include <sys/utsname.h>
 #include <unistd.h>
+#include <dirent.h>
 
 #define CHUNK_SIZE 1024 // read 1024 bytes at a time
 
@@ -69,6 +71,13 @@ int file_exists(const char *file_name) {
   return exists;
 }
 
+int is_directory(const char *path) {
+  struct stat statbuf;
+  if (stat(path, &statbuf) != 0)
+    return 0;
+  return S_ISDIR(statbuf.st_mode);
+}
+
 int read_file(const char *file_name) {
   char buf[CHUNK_SIZE];
   FILE *file;
@@ -94,6 +103,93 @@ int build_public_path(char *dest, size_t dest_size, const char *relative_path) {
     return -1; // Path too long
   }
   return 0;
+}
+
+// Format file size in human-readable format
+void format_size(off_t size, char *buf, size_t buf_size) {
+  if (size < 1024) {
+    snprintf(buf, buf_size, "%lld B", (long long)size);
+  } else if (size < 1024 * 1024) {
+    snprintf(buf, buf_size, "%.1f KB", size / 1024.0);
+  } else if (size < 1024 * 1024 * 1024) {
+    snprintf(buf, buf_size, "%.1f MB", size / (1024.0 * 1024.0));
+  } else {
+    snprintf(buf, buf_size, "%.1f GB", size / (1024.0 * 1024.0 * 1024.0));
+  }
+}
+
+// Serve directory listing
+void serve_directory_listing(const char *dir_path, const char *uri_path) {
+  DIR *dir;
+  struct dirent *entry;
+  struct stat file_stat;
+  char full_path[512];
+  char size_str[32];
+  char time_str[64];
+
+  dir = opendir(dir_path);
+  if (!dir) {
+    HTTP_404;
+    printf("Cannot open directory\n");
+    return;
+  }
+
+  HTTP_200;
+
+  // HTML header
+  printf(DIR_LISTING_HTML_HEAD, uri_path, uri_path);
+
+  // Table header
+  printf("%s", DIR_LISTING_TABLE_HEAD);
+
+  // Parent directory link
+  if (strcmp(uri_path, "/") != 0) {
+    printf("%s", DIR_LISTING_PARENT_ROW);
+  }
+
+  // Read directory entries
+  while ((entry = readdir(dir)) != NULL) {
+    // Skip hidden files and . ..
+    if (entry->d_name[0] == '.') continue;
+
+    // Build full path
+    snprintf(full_path, sizeof(full_path), "%s/%s", dir_path, entry->d_name);
+
+    // Get file stats
+    if (stat(full_path, &file_stat) != 0) continue;
+
+    // Format modification time
+    struct tm *tm_info = localtime(&file_stat.st_mtime);
+    strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", tm_info);
+
+    // Check if directory
+    int is_dir = S_ISDIR(file_stat.st_mode);
+
+    // Format size
+    if (is_dir) {
+      snprintf(size_str, sizeof(size_str), "-");
+    } else {
+      format_size(file_stat.st_size, size_str, sizeof(size_str));
+    }
+
+    // Build URI for the file
+    const char *trailing_slash = (uri_path[strlen(uri_path) - 1] == '/') ? "" : "/";
+    const char *dir_slash = is_dir ? "/" : "";
+
+    // Table row
+    printf("<tr>");
+    printf("<td><a href=\"%s%s%s%s\" class=\"%s\">%s%s</a></td>",
+           uri_path, trailing_slash, entry->d_name, dir_slash,
+           is_dir ? "dir" : "",
+           entry->d_name, dir_slash);
+    printf("<td class=\"date\">%s</td>", time_str);
+    printf("<td class=\"size\">%s</td>", size_str);
+    printf("</tr>\n");
+  }
+
+  printf("%s", DIR_LISTING_HTML_FOOTER);
+
+  closedir(dir);
 }
 
 // Serve static file from public directory
@@ -148,14 +244,14 @@ void route() {
     printf("===========================================\n");
     printf("    Pico HTTP Server - System Info\n");
     printf("===========================================\n\n");
-    
+
     // Current date and time
     time_t now = time(NULL);
     struct tm *tm_info = localtime(&now);
     char time_buffer[80];
     strftime(time_buffer, sizeof(time_buffer), "%Y-%m-%d %H:%M:%S %Z", tm_info);
     printf("Current Date/Time:     %s\n", time_buffer);
-    
+
     // Server uptime
     extern time_t server_start_time;
     double uptime = difftime(now, server_start_time);
@@ -163,7 +259,7 @@ void route() {
     int uptime_minutes = (int)((uptime - uptime_hours * 3600) / 60);
     int uptime_seconds = (int)(uptime - uptime_hours * 3600 - uptime_minutes * 60);
     printf("Server Uptime:         %02d:%02d:%02d\n", uptime_hours, uptime_minutes, uptime_seconds);
-    
+
     // Operating System information
     struct utsname sys_info;
     if (uname(&sys_info) == 0) {
@@ -173,7 +269,7 @@ void route() {
       printf("Machine Architecture:  %s\n", sys_info.machine);
       printf("Hostname:              %s\n", sys_info.nodename);
     }
-    
+
     // Compiler information
     #ifdef __GNUC__
       printf("Compiler:              GCC %d.%d.%d\n", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
@@ -182,9 +278,9 @@ void route() {
     #else
       printf("Compiler:              Unknown\n");
     #endif
-    
+
     printf("Compiled on:           %s %s\n", __DATE__, __TIME__);
-    
+
     // C Standard
     #if defined(__STDC_VERSION__)
       #if __STDC_VERSION__ >= 201710L
@@ -199,26 +295,26 @@ void route() {
     #else
       printf("C Standard:            Pre-C99\n");
     #endif
-    
+
     // Process information
     printf("Process ID (PID):      %d\n", getpid());
     printf("Parent PID (PPID):     %d\n", getppid());
-    
+
     // Server configuration
     extern int *clients;
     printf("Max Connections:       1000\n");
     printf("Buffer Size:           65535 bytes\n");
-    
+
     printf("\n===========================================\n");
     printf("    Request Headers\n");
     printf("===========================================\n\n");
-    
+
     header_t *h = request_headers();
     while (h->name) {
       printf("%s: %s\n", h->name, h->value);
       h++;
     }
-    
+
     printf("\n===========================================\n");
   }
 
@@ -267,7 +363,55 @@ void route() {
   }
 
   GET(uri) {
-    serve_static_file(uri);
+    char file_path[256];
+
+    // Build full path
+    if (build_public_path(file_path, sizeof(file_path), uri) < 0) {
+      HTTP_500;
+      printf("Internal error\n");
+      return;
+    }
+
+    // Validate path to prevent directory traversal
+    if (!is_path_safe(file_path, PUBLIC_DIR)) {
+      HTTP_404;
+      printf("Access denied\n");
+      return;
+    }
+
+    // Check if path exists
+    if (!file_exists(file_path)) {
+      HTTP_404;
+      // Try to serve 404 page
+      char not_found_path[256];
+      if (build_public_path(not_found_path, sizeof(not_found_path), NOT_FOUND_HTML) == 0 &&
+          file_exists(not_found_path)) {
+        read_file(not_found_path);
+      } else {
+        printf("File not found\n");
+      }
+      return;
+    }
+
+    // Check if it's a directory
+    if (is_directory(file_path)) {
+      // Try to serve index.html from directory
+      char index_path[512];
+      snprintf(index_path, sizeof(index_path), "%s/index.html", file_path);
+
+      if (file_exists(index_path)) {
+        // Serve index.html
+        HTTP_200;
+        read_file(index_path);
+      } else {
+        // Show directory listing
+        serve_directory_listing(file_path, uri);
+      }
+    } else {
+      // It's a regular file
+      HTTP_200;
+      read_file(file_path);
+    }
   }
 
   ROUTE_END()
