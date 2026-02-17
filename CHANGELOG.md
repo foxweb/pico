@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Enhanced `/test` endpoint with comprehensive system information:
+  - Current date/time with timezone
+  - Server uptime calculation
+  - OS information (name, version, architecture, hostname)
+  - Compiler information (type, version)
+  - Compilation date/time
+  - C standard version
+  - Process IDs (PID, PPID)
+  - Server configuration (max connections, buffer size)
+  - HTTP request headers
 - Path traversal attack prevention with `is_path_safe()` function
 - Buffer overflow protection in request handling
 - NULL pointer checks after `strtok()` calls

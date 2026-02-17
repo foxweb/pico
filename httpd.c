@@ -10,6 +10,7 @@
 #include <sys/mman.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <time.h>
 
 #define MAX_CONNECTIONS 1000
 #define BUF_SIZE 65535
@@ -25,6 +26,9 @@ static char *buf;
 
 // Request headers storage
 header_t reqhdr[17] = {{"\0", "\0"}};
+
+// Server start time for uptime calculation
+time_t server_start_time;
 
 // Client request
 char *method, // "GET" or "POST"
@@ -65,7 +69,10 @@ void serve_forever(const char *PORT) {
 
   int slot = 0;
 
-  printf("Server started %shttp://127.0.0.1:%s%s\n", "\033[92m", PORT,
+  // Record server start time for uptime calculation
+  server_start_time = time(NULL);
+
+  fprintf(stderr, "Server started %shttp://127.0.0.1:%s%s\n", "\033[92m", PORT,
          "\033[0m");
 
   // create shared memory for client slot array

@@ -50,7 +50,7 @@ make
 
 Open in your browser:
 - http://localhost:8000/ - Index page or default greeting
-- http://localhost:8000/test - View request headers
+- http://localhost:8000/test - View system info & request headers
 - http://localhost:8000/[any-file] - Serve static files from `./public`
 
 ### Stop
@@ -75,23 +75,31 @@ int main() {
 ```c
 void route() {
     ROUTE_START()
-
+    
     GET("/hello") {
         HTTP_200;
         printf("Hello, World!\n");
     }
-
+    
+    GET("/test") {
+        HTTP_200;
+        // Display system information
+        printf("Server Uptime: ...\n");
+        printf("OS: %s\n", ...);
+        // Full implementation in main.c
+    }
+    
     POST("/data") {
         HTTP_201;
         printf("Received %d bytes\n", payload_size);
         // Access POST data via: payload, payload_size
     }
-
+    
     GET(uri) {
         // Catch-all route for static files
         serve_static_file(uri);
     }
-
+    
     ROUTE_END()
 }
 ```

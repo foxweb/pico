@@ -2,6 +2,9 @@
 #include <sys/stat.h>
 #include <limits.h>
 #include <stdlib.h>
+#include <time.h>
+#include <sys/utsname.h>
+#include <unistd.h>
 
 #define CHUNK_SIZE 1024 // read 1024 bytes at a time
 
@@ -140,14 +143,81 @@ void route() {
 
   GET("/test") {
     HTTP_200;
-    printf("List of request headers:\n\n");
-
+    printf("===========================================\n");
+    printf("    Pico HTTP Server - System Info\n");
+    printf("===========================================\n\n");
+    
+    // Current date and time
+    time_t now = time(NULL);
+    struct tm *tm_info = localtime(&now);
+    char time_buffer[80];
+    strftime(time_buffer, sizeof(time_buffer), "%Y-%m-%d %H:%M:%S %Z", tm_info);
+    printf("Current Date/Time:     %s\n", time_buffer);
+    
+    // Server uptime
+    extern time_t server_start_time;
+    double uptime = difftime(now, server_start_time);
+    int uptime_hours = (int)(uptime / 3600);
+    int uptime_minutes = (int)((uptime - uptime_hours * 3600) / 60);
+    int uptime_seconds = (int)(uptime - uptime_hours * 3600 - uptime_minutes * 60);
+    printf("Server Uptime:         %02d:%02d:%02d\n", uptime_hours, uptime_minutes, uptime_seconds);
+    
+    // Operating System information
+    struct utsname sys_info;
+    if (uname(&sys_info) == 0) {
+      printf("Operating System:      %s\n", sys_info.sysname);
+      printf("OS Release:            %s\n", sys_info.release);
+      printf("OS Version:            %s\n", sys_info.version);
+      printf("Machine Architecture:  %s\n", sys_info.machine);
+      printf("Hostname:              %s\n", sys_info.nodename);
+    }
+    
+    // Compiler information
+    #ifdef __GNUC__
+      printf("Compiler:              GCC %d.%d.%d\n", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
+    #elif defined(__clang__)
+      printf("Compiler:              Clang %s\n", __clang_version__);
+    #else
+      printf("Compiler:              Unknown\n");
+    #endif
+    
+    printf("Compiled on:           %s %s\n", __DATE__, __TIME__);
+    
+    // C Standard
+    #if defined(__STDC_VERSION__)
+      #if __STDC_VERSION__ >= 201710L
+        printf("C Standard:            C18\n");
+      #elif __STDC_VERSION__ >= 201112L
+        printf("C Standard:            C11\n");
+      #elif __STDC_VERSION__ >= 199901L
+        printf("C Standard:            C99\n");
+      #else
+        printf("C Standard:            C90\n");
+      #endif
+    #else
+      printf("C Standard:            Pre-C99\n");
+    #endif
+    
+    // Process information
+    printf("Process ID (PID):      %d\n", getpid());
+    printf("Parent PID (PPID):     %d\n", getppid());
+    
+    // Server configuration
+    extern int *clients;
+    printf("Max Connections:       1000\n");
+    printf("Buffer Size:           65535 bytes\n");
+    
+    printf("\n===========================================\n");
+    printf("    Request Headers\n");
+    printf("===========================================\n\n");
+    
     header_t *h = request_headers();
-
     while (h->name) {
       printf("%s: %s\n", h->name, h->value);
       h++;
     }
+    
+    printf("\n===========================================\n");
   }
 
   POST("/") {
