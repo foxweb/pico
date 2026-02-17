@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Process IDs (PID, PPID)
   - Server configuration (max connections, buffer size)
   - HTTP request headers
+- Use `SOMAXCONN` for `listen()` backlog instead of hardcoded value
 - Path traversal attack prevention with `is_path_safe()` function
 - Buffer overflow protection in request handling
 - NULL pointer checks after `strtok()` calls
@@ -45,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - NULL pointer dereference in request parsing
 - Unsafe pointer arithmetic in header parsing
 - Invalid error handling (execution continuing after errors)
+- Typo in error message: "upexpectedly" → "unexpectedly"
 
 ### Security
 - Fixed critical path traversal vulnerability (CVE-TBD)

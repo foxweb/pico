@@ -14,7 +14,6 @@
 
 #define MAX_CONNECTIONS 1000
 #define BUF_SIZE 65535
-#define QUEUE_SIZE 1000000
 
 static int listenfd;
 int *clients;
@@ -171,7 +170,7 @@ void start_server(const char *port) {
   freeaddrinfo(res);
 
   // listen for incoming connections
-  if (listen(listenfd, QUEUE_SIZE) != 0) {
+  if (listen(listenfd, SOMAXCONN) != 0) {
     perror("listen() error");
     exit(1);
   }
@@ -266,7 +265,7 @@ void respond(int slot) {
     free(buf);
     return;
   } else if (rcvd == 0) { // receive socket closed
-    fprintf(stderr, "Client disconnected upexpectedly.\n");
+    fprintf(stderr, "Client disconnected unexpectedly.\n");
     free(buf);
     return;
   }
