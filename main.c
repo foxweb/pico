@@ -13,11 +13,13 @@
 #define INDEX_HTML "/index.html"
 #define NOT_FOUND_HTML "/404.html"
 
+#ifndef TESTING
 int main(int c, char **v) {
   char *port = c == 1 ? "8000" : v[1];
   serve_forever(port);
   return 0;
 }
+#endif
 
 // Validate path to prevent directory traversal attacks
 int is_path_safe(const char *path, const char *base_dir) {

@@ -22,7 +22,7 @@ cd "$(dirname "$0")/.." || exit 1
 
 # Compile unit tests
 echo -e "${YELLOW}Compiling unit tests...${NC}"
-gcc -g -o tests/test_main tests/test_main.c main.c -I. -DTESTING || {
+gcc -g -o tests/test_main tests/test_main.c main.c httpd.c -I. -DTESTING || {
   echo -e "${RED}Failed to compile unit tests${NC}"
   exit 1
 }

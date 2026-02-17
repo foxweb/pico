@@ -83,7 +83,7 @@ TEST(test_build_public_path_root) {
 
 TEST(test_file_exists_real_file) {
   // Test with Makefile (should exist)
-  int exists = file_exists("../Makefile");
+  int exists = file_exists("Makefile");
   ASSERT_TRUE(exists);
 }
 

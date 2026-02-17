@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI/CD configuration
 
 ### Changed
+- Simplified GitHub Actions workflow to Ubuntu-only (removed macOS builds)
 - Updated GitHub Actions workflow to use v4 of `actions/checkout` and `actions/upload-artifact`
 - Replaced `signal()` with `sigaction()` for more reliable signal handling
 - Replaced unsafe `sprintf()` with `snprintf()` throughout codebase
@@ -52,6 +53,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unsafe pointer arithmetic in header parsing
 - Invalid error handling (execution continuing after errors)
 - Typo in error message: "upexpectedly" → "unexpectedly"
+- Unit tests: Added conditional compilation for `main()` function
+- Unit tests: Fixed file path in `test_file_exists_real_file`
+- Unit tests: Updated compilation to include `httpd.c`
 
 ### Security
 - Fixed critical path traversal vulnerability (CVE-TBD)

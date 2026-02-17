@@ -45,7 +45,7 @@ jobs:
     
     - name: Run unit tests
       run: |
-        gcc -o tests/test_main tests/test_main.c main.c -I. -DTESTING
+        gcc -o tests/test_main tests/test_main.c main.c httpd.c -I. -DTESTING
         ./tests/test_main
     
     - name: Run integration tests

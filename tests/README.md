@@ -2,6 +2,41 @@
 
 This directory contains unit and integration tests for the Pico HTTP Server.
 
+## Prerequisites
+
+### For Unit Tests
+- gcc or clang compiler
+- Standard C library
+
+### For Integration Tests
+- Python 3.x
+- Python `requests` library
+
+**Install Python dependencies:**
+
+Ubuntu/Debian:
+```bash
+sudo apt-get install python3 python3-pip
+pip3 install requests
+```
+
+macOS (homebrew):
+```bash
+brew install python3
+pip3 install requests
+```
+
+If you encounter "externally-managed-environment" error (Python 3.11+):
+```bash
+# Option 1: Use virtual environment (recommended)
+python3 -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install requests
+
+# Option 2: Use system package manager
+# Ubuntu: sudo apt-get install python3-requests
+```
+
 ## Running Tests
 
 ### Quick Test
@@ -20,7 +55,7 @@ Compile and run unit tests manually:
 
 ```sh
 # From project root
-gcc -o tests/test_main tests/test_main.c main.c -I. -DTESTING
+gcc -o tests/test_main tests/test_main.c main.c httpd.c -I. -DTESTING
 ./tests/test_main
 ```
 
