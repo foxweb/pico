@@ -56,6 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unit tests: Added conditional compilation for `main()` function
 - Unit tests: Fixed file path in `test_file_exists_real_file`
 - Unit tests: Updated compilation to include `httpd.c`
+- CI: Fixed valgrind memory leak detection logic (false positive)
 
 ### Security
 - Fixed critical path traversal vulnerability (CVE-TBD)
