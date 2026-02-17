@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **HEAD method support** - Check resource existence without downloading content
+  - `HEAD()` macro for defining HEAD routes
+  - Example HEAD routes for `/`, `/test`, and static files
+  - Returns HTTP headers without message body (RFC 7231 compliant)
 - Enhanced `/test` endpoint with comprehensive system information:
   - Current date/time with timezone
   - Server uptime calculation
@@ -32,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI/CD configuration
 
 ### Changed
+- Updated GitHub Actions workflow to use v4 of `actions/checkout` and `actions/upload-artifact`
 - Replaced `signal()` with `sigaction()` for more reliable signal handling
 - Replaced unsafe `sprintf()` with `snprintf()` throughout codebase
 - Fixed format string vulnerability in POST handler

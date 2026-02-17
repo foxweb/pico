@@ -231,6 +231,39 @@ void route() {
     }
   }
 
+  HEAD("/") {
+    // HEAD is like GET but returns only headers, no body
+    char index_html[256];
+    if (build_public_path(index_html, sizeof(index_html), INDEX_HTML) == 0 &&
+        file_exists(index_html)) {
+      HTTP_200;
+      // No body sent for HEAD requests
+    } else {
+      HTTP_200;
+      // No body sent for HEAD requests
+    }
+  }
+
+  HEAD("/test") {
+    // Return headers only, useful for checking if endpoint exists
+    HTTP_200;
+    // No body sent for HEAD requests
+  }
+
+  HEAD(uri) {
+    // Check if static file exists without sending content
+    char file_name[256];
+    if (build_public_path(file_name, sizeof(file_name), uri) == 0 &&
+        is_path_safe(file_name, PUBLIC_DIR) &&
+        file_exists(file_name)) {
+      HTTP_200;
+      // No body sent for HEAD requests
+    } else {
+      HTTP_404;
+      // No body sent for HEAD requests
+    }
+  }
+
   GET(uri) {
     serve_static_file(uri);
   }

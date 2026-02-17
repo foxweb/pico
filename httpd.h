@@ -160,6 +160,28 @@ void route();
 #define POST(URI) ROUTE("POST", URI)
 
 /**
+ * @brief Define a HEAD route
+ *
+ * HEAD method is identical to GET except the server does not return
+ * the message body in the response. Useful for checking if a resource
+ * exists or getting metadata without downloading the full content.
+ *
+ * @param URI URI path to match (e.g., "/file.txt")
+ *
+ * @code
+ * HEAD("/file.txt") {
+ *     if (file_exists("public/file.txt")) {
+ *         HTTP_200;
+ *         // Headers sent, no body
+ *     } else {
+ *         HTTP_404;
+ *     }
+ * }
+ * @endcode
+ */
+#define HEAD(URI) ROUTE("HEAD", URI)
+
+/**
  * @brief End route definitions
  *
  * Must be the last statement in the route() function.

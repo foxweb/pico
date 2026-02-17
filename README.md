@@ -15,10 +15,11 @@ A minimal HTTP server for Unix/Linux systems using fork-based concurrency. Simpl
 
 ## Features
 
-- Simple routing with `GET()` and `POST()` macros
+- Simple routing with `GET()`, `POST()`, and `HEAD()` macros
 - Static file serving from `./public` directory
 - Request header parsing and access
 - POST payload handling
+- HEAD method support for checking resource existence
 - Fork-based concurrency (up to 1000 concurrent connections)
 - Path traversal protection
 - Graceful shutdown with signal handling
@@ -75,12 +76,12 @@ int main() {
 ```c
 void route() {
     ROUTE_START()
-    
+
     GET("/hello") {
         HTTP_200;
         printf("Hello, World!\n");
     }
-    
+
     GET("/test") {
         HTTP_200;
         // Display system information
@@ -88,18 +89,28 @@ void route() {
         printf("OS: %s\n", ...);
         // Full implementation in main.c
     }
-    
+
     POST("/data") {
         HTTP_201;
         printf("Received %d bytes\n", payload_size);
         // Access POST data via: payload, payload_size
     }
-    
+
+    HEAD("/file.pdf") {
+        // Check if resource exists without sending body
+        if (file_exists("public/file.pdf")) {
+            HTTP_200;
+            // Headers sent, no body (HEAD behavior)
+        } else {
+            HTTP_404;
+        }
+    }
+
     GET(uri) {
         // Catch-all route for static files
         serve_static_file(uri);
     }
-    
+
     ROUTE_END()
 }
 ```
@@ -200,6 +211,7 @@ See `main.c` for a complete example. Key steps:
 - `ROUTE_START()` - Begin route definition
 - `GET(path)` - Define GET route
 - `POST(path)` - Define POST route
+- `HEAD(path)` - Define HEAD route (returns headers only, no body)
 - `ROUTE_END()` - End route definition
 
 ### Request Functions
