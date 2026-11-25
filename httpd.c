@@ -333,6 +333,13 @@ void respond(int slot) {
     } else if (t && t >= buf && t < buf + rcvd) {
       payload_size = rcvd - (t - buf);
     }
+    if (!payload || payload_size < 0) {
+      payload_size = 0;
+    } else {
+      int available = rcvd - (int)(payload - buf);
+      if (payload_size > available)
+        payload_size = available;
+    }
 
     // bind clientfd to stdout, making it easier to write
     int clientfd = clients[slot];
