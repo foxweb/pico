@@ -119,6 +119,17 @@ class PicoServerTest:
         assert response.status_code in [200, 201], \
             f"Expected 200 or 201, got {response.status_code}"
 
+    def test_parent_closes_client_sockets(self):
+        """Test the server process doesn't keep client sockets open"""
+        fd_dir = f'/proc/{self.server_process.pid}/fd'
+        if not os.path.isdir(fd_dir):
+            return
+        for _ in range(50):
+            requests.get(f'{self.base_url}/')
+        time.sleep(0.5)
+        open_fds = len(os.listdir(fd_dir))
+        assert open_fds < 20, f"Server has {open_fds} open file descriptors"
+
     def test_user_agent_header(self):
         """Test that User-Agent header is received"""
         headers = {'User-Agent': 'PicoTestClient/1.0'}
@@ -216,6 +227,7 @@ class PicoServerTest:
             self.run_test("POST request empty data", self.test_post_empty_data)
             self.run_test("User-Agent header", self.test_user_agent_header)
             self.run_test("Multiple sequential requests", self.test_multiple_requests)
+            self.run_test("Server closes client sockets", self.test_parent_closes_client_sockets)
             self.run_test("Custom header handling", self.test_custom_header)
             self.run_test("Query string handling", self.test_query_string)
             self.run_test("URL-encoded path", self.test_url_encoded_path)

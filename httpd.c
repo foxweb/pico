@@ -9,6 +9,7 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/socket.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <time.h>
 
@@ -17,6 +18,7 @@
 
 static int listenfd;
 int *clients;
+static pid_t child_pids[MAX_CONNECTIONS];
 static void start_server(const char *);
 static void respond(int);
 static void cleanup_and_exit(int signum);
@@ -62,6 +64,21 @@ void cleanup_and_exit(int signum) {
   exit(0);
 }
 
+static void reap_children(int block) {
+  pid_t pid;
+  int i;
+  while ((pid = waitpid(-1, NULL, block ? 0 : WNOHANG)) > 0) {
+    for (i = 0; i < MAX_CONNECTIONS; i++) {
+      if (child_pids[i] == pid) {
+        child_pids[i] = 0;
+        clients[i] = -1;
+        break;
+      }
+    }
+    block = 0;
+  }
+}
+
 void serve_forever(const char *PORT) {
   struct sockaddr_in clientaddr;
   socklen_t addrlen;
@@ -97,12 +114,6 @@ void serve_forever(const char *PORT) {
   sigaction(SIGINT, &sa_exit, NULL);
   sigaction(SIGTERM, &sa_exit, NULL);
 
-  // Ignore SIGCHLD to avoid zombie processes
-  struct sigaction sa_chld;
-  sa_chld.sa_handler = SIG_IGN;
-  sigemptyset(&sa_chld.sa_mask);
-  sa_chld.sa_flags = SA_NOCLDWAIT; // Automatically reap child processes
-  sigaction(SIGCHLD, &sa_chld, NULL);
 
   // ACCEPT connections
   while (1) {
@@ -113,7 +124,8 @@ void serve_forever(const char *PORT) {
       perror("accept() error");
       exit(1);
     } else {
-      if (fork() == 0) {
+      pid_t pid = fork();
+      if (pid == 0) {
         // Child process: close listening socket and handle request
         close(listenfd);
         respond(slot);
@@ -121,13 +133,24 @@ void serve_forever(const char *PORT) {
         clients[slot] = -1;
         exit(0);
       }
-      // Parent process: don't close the client socket, let child handle it
-      // The child will set clients[slot] = -1 when done
+      close(clients[slot]);
+      if (pid < 0) {
+        perror("fork() error");
+        clients[slot] = -1;
+      } else {
+        child_pids[slot] = pid;
+      }
     }
 
-    // Find next available slot
-    while (clients[slot] != -1)
+    reap_children(0);
+    int checked = 0;
+    while (clients[slot] != -1) {
       slot = (slot + 1) % MAX_CONNECTIONS;
+      if (++checked == MAX_CONNECTIONS) {
+        reap_children(1);
+        checked = 0;
+      }
+    }
   }
 }
 
