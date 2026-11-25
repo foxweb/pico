@@ -12,6 +12,7 @@ import subprocess
 import requests
 import os
 import signal
+import socket
 
 class Colors:
     GREEN = '\033[92m'
@@ -119,6 +120,42 @@ class PicoServerTest:
         assert response.status_code in [200, 201], \
             f"Expected 200 or 201, got {response.status_code}"
 
+    def send_raw(self, data):
+        """Send raw request bytes and return the full response"""
+        with socket.create_connection(('localhost', self.port), timeout=2) as sock:
+            sock.sendall(data)
+            sock.shutdown(socket.SHUT_WR)
+            chunks = []
+            try:
+                while True:
+                    chunk = sock.recv(65536)
+                    if not chunk:
+                        break
+                    chunks.append(chunk)
+            except socket.timeout:
+                pass
+        return b''.join(chunks)
+
+    def test_post_content_length_larger_than_body(self):
+        """Test POST only echoes the body bytes actually received"""
+        response = self.send_raw(b'POST / HTTP/1.1\r\nContent-Length: 100000\r\n\r\nA')
+        assert b'POSTed 1 bytes' in response, f"Unexpected response: {response[:200]!r}"
+        assert len(response) < 1024, f"Response too large: {len(response)} bytes"
+
+    def test_post_content_length_without_body(self):
+        """Test POST with Content-Length and no body is answered"""
+        response = self.send_raw(b'POST / HTTP/1.1\r\nContent-Length: 3\r\n\r\n')
+        assert b'POSTed 0 bytes' in response, f"Unexpected response: {response[:200]!r}"
+        response = requests.get(f'{self.base_url}/')
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}"
+
+    def test_post_body_with_null_byte(self):
+        """Test POST echoes a full body that contains a null byte"""
+        body = b'hello\x00world'
+        response = self.send_raw(b'POST / HTTP/1.1\r\nContent-Length: 11\r\n\r\n' + body)
+        assert b'POSTed 11 bytes' in response, f"Unexpected response: {response[:200]!r}"
+        assert body in response, "Body not echoed in full"
+
     def test_user_agent_header(self):
         """Test that User-Agent header is received"""
         headers = {'User-Agent': 'PicoTestClient/1.0'}
@@ -214,6 +251,9 @@ class PicoServerTest:
             self.run_test("Path traversal protection", self.test_path_traversal_blocked)
             self.run_test("POST request with data", self.test_post_request)
             self.run_test("POST request empty data", self.test_post_empty_data)
+            self.run_test("POST Content-Length larger than body", self.test_post_content_length_larger_than_body)
+            self.run_test("POST Content-Length without body", self.test_post_content_length_without_body)
+            self.run_test("POST body with null byte", self.test_post_body_with_null_byte)
             self.run_test("User-Agent header", self.test_user_agent_header)
             self.run_test("Multiple sequential requests", self.test_multiple_requests)
             self.run_test("Custom header handling", self.test_custom_header)
