@@ -1,1 +1,592 @@
-<h1>Привет</h1>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Привет! Красивая страница</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .hero-button {
+            display: inline-block;
+            margin: 20px auto;
+            padding: 20px 50px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .hero-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+        }
+
+        .hero-button:active {
+            transform: translateY(-2px);
+        }
+
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .section {
+            margin: 40px 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2em;
+            border-left: 5px solid #667eea;
+            padding-left: 15px;
+        }
+
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .image-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .image-card:hover {
+            transform: scale(1.05);
+        }
+
+        .image-placeholder {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3em;
+        }
+
+        .image-card p {
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .buttons-demo {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-success {
+            background: #4ade80;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #f43f5e;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #fbbf24;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        form {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        tr:hover {
+            background: #f5f7fa;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+            line-height: 2;
+        }
+
+        ul li, ol li {
+            margin: 10px 0;
+            color: #334155;
+        }
+
+        .links-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .link-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .link-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .link-card a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .link-card a:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            background: #1e293b;
+            color: white;
+            text-align: center;
+            padding: 30px;
+            margin-top: 40px;
+        }
+
+        .emoji {
+            font-size: 2em;
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalAppear 0.3s ease;
+        }
+
+        @keyframes modalAppear {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -60%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .modal-content h2 {
+            color: #667eea;
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .close-modal {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+        }
+
+        .close-modal:hover {
+            background: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎉 Добро пожаловать! 🎉</h1>
+            <p>Красивая современная веб-страница с множеством элементов</p>
+        </header>
+
+        <div class="content">
+            <!-- Главная кнопка -->
+            <div class="button-container">
+                <button class="hero-button" onclick="showGreeting()">
+                    Нажми меня <span class="emoji">🎈</span>
+                </button>
+            </div>
+
+            <!-- Секция с изображениями -->
+            <div class="section">
+                <h2>🖼️ Галерея изображений</h2>
+                <div class="image-gallery">
+                    <div class="image-card">
+                        <div class="image-placeholder">🌅</div>
+                        <p>Восход солнца</p>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-placeholder">🌲</div>
+                        <p>Природа</p>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-placeholder">🏔️</div>
+                        <p>Горы</p>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-placeholder">🌊</div>
+                        <p>Океан</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Секция с кнопками -->
+            <div class="section">
+                <h2>🎨 Коллекция кнопок</h2>
+                <div class="buttons-demo">
+                    <button class="btn btn-primary" onclick="alert('Основная кнопка!')">Основная</button>
+                    <button class="btn btn-success" onclick="alert('Успех!')">Успех</button>
+                    <button class="btn btn-danger" onclick="alert('Внимание!')">Опасность</button>
+                    <button class="btn btn-warning" onclick="alert('Предупреждение!')">Предупреждение</button>
+                </div>
+            </div>
+
+            <!-- Форма -->
+            <div class="section">
+                <h2>📝 Контактная форма</h2>
+                <form onsubmit="event.preventDefault(); alert('Форма отправлена! ✅');">
+                    <div class="form-group">
+                        <label for="name">Ваше имя:</label>
+                        <input type="text" id="name" name="name" placeholder="Введите ваше имя" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" placeholder="example@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Телефон:</label>
+                        <input type="tel" id="phone" name="phone" placeholder="+7 (999) 123-45-67">
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Категория:</label>
+                        <select id="category" name="category">
+                            <option value="">Выберите категорию</option>
+                            <option value="question">Вопрос</option>
+                            <option value="suggestion">Предложение</option>
+                            <option value="complaint">Жалоба</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Сообщение:</label>
+                        <textarea id="message" name="message" placeholder="Введите ваше сообщение..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Отправить сообщение</button>
+                </form>
+            </div>
+
+            <!-- Таблица -->
+            <div class="section">
+                <h2>📊 Информационная таблица</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>Название</th>
+                            <th>Описание</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>HTML</td>
+                            <td>Язык разметки гипертекста</td>
+                            <td>✅ Активен</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>CSS</td>
+                            <td>Каскадные таблицы стилей</td>
+                            <td>✅ Активен</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>JavaScript</td>
+                            <td>Язык программирования</td>
+                            <td>✅ Активен</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Pico HTTP Server</td>
+                            <td>Минималистичный веб-сервер</td>
+                            <td>🚀 Работает</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Списки -->
+            <div class="section">
+                <h2>📋 Списки задач</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <div>
+                        <h3 style="color: #667eea; margin-bottom: 15px;">Маркированный список:</h3>
+                        <ul>
+                            <li>Создать красивую страницу ✅</li>
+                            <li>Добавить интерактивность ✅</li>
+                            <li>Использовать CSS градиенты ✅</li>
+                            <li>Добавить анимации ✅</li>
+                            <li>Сделать адаптивный дизайн ✅</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 style="color: #667eea; margin-bottom: 15px;">Нумерованный список:</h3>
+                        <ol>
+                            <li>Открыть HTML файл</li>
+                            <li>Написать структуру</li>
+                            <li>Добавить стили</li>
+                            <li>Добавить JavaScript</li>
+                            <li>Протестировать результат</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ссылки -->
+            <div class="section">
+                <h2>🔗 Полезные ссылки</h2>
+                <div class="links-section">
+                    <div class="link-card">
+                        <a href="https://github.com/" target="_blank">🐙 GitHub</a>
+                    </div>
+                    <div class="link-card">
+                        <a href="https://stackoverflow.com/" target="_blank">📚 Stack Overflow</a>
+                    </div>
+                    <div class="link-card">
+                        <a href="https://developer.mozilla.org/" target="_blank">📖 MDN Web Docs</a>
+                    </div>
+                    <div class="link-card">
+                        <a href="https://www.w3schools.com/" target="_blank">🎓 W3Schools</a>
+                    </div>
+                    <div class="link-card">
+                        <a href="https://css-tricks.com/" target="_blank">🎨 CSS-Tricks</a>
+                    </div>
+                    <div class="link-card">
+                        <a href="https://codepen.io/" target="_blank">✏️ CodePen</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Дополнительный контент -->
+            <div class="section">
+                <h2>✨ О странице</h2>
+                <p style="line-height: 1.8; color: #334155; font-size: 1.1em;">
+                    Эта страница создана с использованием современных технологий HTML5 и CSS3. 
+                    Здесь вы можете найти различные элементы веб-дизайна: кнопки, формы, таблицы, 
+                    списки и ссылки. Все элементы стилизованы с помощью градиентов, теней и анимаций 
+                    для создания привлекательного внешнего вида. Страница полностью адаптивна и 
+                    корректно отображается на различных устройствах. 🚀
+                </p>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2026 Красивая веб-страница | Создано с ❤️ и CSS</p>
+            <p style="margin-top: 10px; opacity: 0.8;">Работает на Pico HTTP Server</p>
+        </footer>
+    </div>
+
+    <!-- Модальное окно -->
+    <div id="greetingModal" class="modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h2>👋 Привет!</h2>
+            <p style="font-size: 1.5em; color: #667eea;">Рады приветствовать вас!</p>
+            <p style="margin-top: 20px; color: #64748b;">Спасибо, что нажали на кнопку! 🎉</p>
+            <button class="close-modal" onclick="closeModal()">Закрыть</button>
+        </div>
+    </div>
+
+    <script>
+        function showGreeting() {
+            document.getElementById('greetingModal').style.display = 'block';
+        }
+
+        function closeModal(event) {
+            if (!event || event.target.id === 'greetingModal') {
+                document.getElementById('greetingModal').style.display = 'none';
+            }
+        }
+
+        // Закрытие модального окна по ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
